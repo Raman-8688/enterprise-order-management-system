@@ -10,6 +10,8 @@ public class AuthServiceApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(AuthServiceApplication.class, args);
+		System.out.println(" Auth Service Started!");
+		System.out.println(" Auth service : http://localhost:8081");
 	}
 
 }

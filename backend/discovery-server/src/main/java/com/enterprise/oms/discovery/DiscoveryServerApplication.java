@@ -10,8 +10,8 @@ public class DiscoveryServerApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(DiscoveryServerApplication.class, args);
-		System.out.println("🔍 Eureka Server Started!");
-		System.out.println("📊 Dashboard: http://localhost:8761");
+		System.out.println(" Eureka Server Started!");
+		System.out.println(" Dashboard: http://localhost:8761");
 	}
 
 }
