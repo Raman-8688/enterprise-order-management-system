@@ -551,3 +551,228 @@ org.springframework.web.HttpRequestMethodNotSupportedException: Request method '
 2026-06-08T16:52:50.155+05:30  INFO 6912 --- [inventory-service] [SpringApplicationShutdownHook] com.netflix.discovery.DiscoveryClient    : Unregistering ...
 2026-06-08T16:52:50.184+05:30  INFO 6912 --- [inventory-service] [SpringApplicationShutdownHook] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_INVENTORY-SERVICE/inventory-service:0dc2c141fc42076ee469e987093b516d - deregister  status: 200
 2026-06-08T16:52:50.196+05:30  INFO 6912 --- [inventory-service] [SpringApplicationShutdownHook] com.netflix.discovery.DiscoveryClient    : Completed shut down of DiscoveryClient
+2026-06-08T16:56:52.731+05:30  INFO 18080 --- [inventory-service] [main] c.e.o.i.InventoryServiceApplication      : Starting InventoryServiceApplication using Java 22.0.2 with PID 18080 (D:\enterprise-order-management-system\backend\inventory-service\target\classes started by opentaps in D:\enterprise-order-management-system)
+2026-06-08T16:56:52.734+05:30 DEBUG 18080 --- [inventory-service] [main] c.e.o.i.InventoryServiceApplication      : Running with Spring Boot v3.2.0, Spring v6.1.1
+2026-06-08T16:56:52.735+05:30  INFO 18080 --- [inventory-service] [main] c.e.o.i.InventoryServiceApplication      : No active profile set, falling back to 1 default profile: "default"
+2026-06-08T16:56:55.100+05:30  INFO 18080 --- [inventory-service] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-06-08T16:56:55.446+05:30  INFO 18080 --- [inventory-service] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 329 ms. Found 1 JPA repository interface.
+2026-06-08T16:56:56.066+05:30  INFO 18080 --- [inventory-service] [main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=d9a85b3d-f5af-3842-bb99-77d45e7a2700
+2026-06-08T16:56:56.869+05:30  WARN 18080 --- [inventory-service] [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration$LoadBalancerInterceptorConfig' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration$LoadBalancerInterceptorConfig] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). The currently created BeanPostProcessor [lbRestClientPostProcessor] is declared through a non-static factory method on that class; consider declaring it as static instead.
+2026-06-08T16:56:56.879+05:30  WARN 18080 --- [inventory-service] [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.loadbalancer.config.BlockingLoadBalancerClientAutoConfiguration' of type [org.springframework.cloud.loadbalancer.config.BlockingLoadBalancerClientAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-06-08T16:56:56.886+05:30  WARN 18080 --- [inventory-service] [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.loadbalancer.config.LoadBalancerAutoConfiguration' of type [org.springframework.cloud.loadbalancer.config.LoadBalancerAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-06-08T16:56:56.914+05:30  WARN 18080 --- [inventory-service] [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.commons.config.CommonsConfigAutoConfiguration' of type [org.springframework.cloud.commons.config.CommonsConfigAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-06-08T16:56:56.922+05:30  WARN 18080 --- [inventory-service] [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.client.loadbalancer.LoadBalancerDefaultMappingsProviderAutoConfiguration' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerDefaultMappingsProviderAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-06-08T16:56:56.927+05:30  WARN 18080 --- [inventory-service] [main] trationDelegate$BeanPostProcessorChecker : Bean 'loadBalancerClientsDefaultsMappingsProvider' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerDefaultMappingsProviderAutoConfiguration$$Lambda/0x000001d1424ae410] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-06-08T16:56:56.934+05:30  WARN 18080 --- [inventory-service] [main] trationDelegate$BeanPostProcessorChecker : Bean 'defaultsBindHandlerAdvisor' of type [org.springframework.cloud.commons.config.DefaultsBindHandlerAdvisor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-06-08T16:56:56.962+05:30  WARN 18080 --- [inventory-service] [main] trationDelegate$BeanPostProcessorChecker : Bean 'spring.cloud.loadbalancer-org.springframework.cloud.client.loadbalancer.LoadBalancerClientsProperties' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerClientsProperties] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-06-08T16:56:56.981+05:30  WARN 18080 --- [inventory-service] [main] trationDelegate$BeanPostProcessorChecker : Bean 'default.org.springframework.cloud.loadbalancer.config.LoadBalancerAutoConfiguration.LoadBalancerClientSpecification' of type [org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-06-08T16:56:56.986+05:30  WARN 18080 --- [inventory-service] [main] trationDelegate$BeanPostProcessorChecker : Bean 'default.org.springframework.cloud.loadbalancer.config.BlockingLoadBalancerClientAutoConfiguration.LoadBalancerClientSpecification' of type [org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-06-08T16:56:56.988+05:30  WARN 18080 --- [inventory-service] [main] trationDelegate$BeanPostProcessorChecker : Bean 'default.org.springframework.cloud.netflix.eureka.loadbalancer.LoadBalancerEurekaAutoConfiguration.LoadBalancerClientSpecification' of type [org.springframework.cloud.loadbalancer.annotation.LoadBalancerClientSpecification] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-06-08T16:56:56.991+05:30  WARN 18080 --- [inventory-service] [main] trationDelegate$BeanPostProcessorChecker : Bean 'loadBalancerClientFactory' of type [org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-06-08T16:56:57.009+05:30  WARN 18080 --- [inventory-service] [main] trationDelegate$BeanPostProcessorChecker : Bean 'blockingLoadBalancerClient' of type [org.springframework.cloud.loadbalancer.blocking.client.BlockingLoadBalancerClient] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-06-08T16:56:57.034+05:30  WARN 18080 --- [inventory-service] [main] trationDelegate$BeanPostProcessorChecker : Bean 'loadBalancerServiceInstanceCookieTransformer' of type [org.springframework.cloud.loadbalancer.core.LoadBalancerServiceInstanceCookieTransformer] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-06-08T16:56:57.039+05:30  WARN 18080 --- [inventory-service] [main] trationDelegate$BeanPostProcessorChecker : Bean 'xForwarderHeadersTransformer' of type [org.springframework.cloud.loadbalancer.blocking.XForwardedHeadersTransformer] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-06-08T16:56:57.044+05:30  WARN 18080 --- [inventory-service] [main] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerAutoConfiguration] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-06-08T16:56:57.051+05:30  WARN 18080 --- [inventory-service] [main] trationDelegate$BeanPostProcessorChecker : Bean 'loadBalancerRequestFactory' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerRequestFactory] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-06-08T16:56:57.055+05:30  WARN 18080 --- [inventory-service] [main] trationDelegate$BeanPostProcessorChecker : Bean 'loadBalancerInterceptor' of type [org.springframework.cloud.client.loadbalancer.LoadBalancerInterceptor] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying). Is this bean getting eagerly injected into a currently created BeanPostProcessor [lbRestClientPostProcessor]? Check the corresponding BeanPostProcessor declaration and its dependencies.
+2026-06-08T16:56:58.331+05:30  INFO 18080 --- [inventory-service] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8083 (http)
+2026-06-08T16:56:58.337+05:30  INFO 18080 --- [inventory-service] [main] o.a.catalina.core.AprLifecycleListener   : Loaded Apache Tomcat Native library [2.0.9] using APR version [1.7.6].
+2026-06-08T16:56:58.344+05:30  INFO 18080 --- [inventory-service] [main] o.a.catalina.core.AprLifecycleListener   : OpenSSL successfully initialized [OpenSSL 3.5.0 8 Apr 2025]
+2026-06-08T16:56:58.363+05:30  INFO 18080 --- [inventory-service] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-06-08T16:56:58.364+05:30  INFO 18080 --- [inventory-service] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.16]
+2026-06-08T16:56:58.657+05:30  INFO 18080 --- [inventory-service] [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-06-08T16:56:58.658+05:30  INFO 18080 --- [inventory-service] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 5778 ms
+2026-06-08T16:56:59.572+05:30  INFO 18080 --- [inventory-service] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-06-08T16:56:59.738+05:30  INFO 18080 --- [inventory-service] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.3.1.Final
+2026-06-08T16:56:59.843+05:30  INFO 18080 --- [inventory-service] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-06-08T16:57:00.393+05:30  INFO 18080 --- [inventory-service] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-06-08T16:57:00.460+05:30  INFO 18080 --- [inventory-service] [main] com.zaxxer.hikari.HikariDataSource       : InventoryServiceHikariPool - Starting...
+2026-06-08T16:57:00.929+05:30  INFO 18080 --- [inventory-service] [main] com.zaxxer.hikari.pool.HikariPool        : InventoryServiceHikariPool - Added connection org.postgresql.jdbc.PgConnection@2de7fe0e
+2026-06-08T16:57:00.932+05:30  INFO 18080 --- [inventory-service] [main] com.zaxxer.hikari.HikariDataSource       : InventoryServiceHikariPool - Start completed.
+2026-06-08T16:57:01.074+05:30  WARN 18080 --- [inventory-service] [main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-06-08T16:57:03.069+05:30  INFO 18080 --- [inventory-service] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-06-08T16:57:03.139+05:30  INFO 18080 --- [inventory-service] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-06-08T16:57:03.638+05:30  INFO 18080 --- [inventory-service] [main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-06-08T16:57:06.620+05:30  INFO 18080 --- [inventory-service] [main] DiscoveryClientOptionalArgsConfiguration : Eureka HTTP Client uses RestTemplate.
+2026-06-08T16:57:06.763+05:30  WARN 18080 --- [inventory-service] [main] iguration$LoadBalancerCaffeineWarnLogger : Spring Cloud LoadBalancer is currently working with the default cache. While this cache implementation is useful for development and tests, it's recommended to use Caffeine cache in production.You can switch to using Caffeine cache, by adding it and org.springframework.cache.caffeine.CaffeineCacheManager to the classpath.
+2026-06-08T16:57:06.795+05:30  INFO 18080 --- [inventory-service] [main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 3 endpoint(s) beneath base path '/actuator'
+2026-06-08T16:57:06.923+05:30  INFO 18080 --- [inventory-service] [main] o.s.c.n.eureka.InstanceInfoFactory       : Setting initial instance status as: STARTING
+2026-06-08T16:57:07.259+05:30  INFO 18080 --- [inventory-service] [main] com.netflix.discovery.DiscoveryClient    : Initializing Eureka in region us-east-1
+2026-06-08T16:57:07.274+05:30  INFO 18080 --- [inventory-service] [main] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-06-08T16:57:07.334+05:30  INFO 18080 --- [inventory-service] [main] com.netflix.discovery.DiscoveryClient    : Disable delta property : false
+2026-06-08T16:57:07.335+05:30  INFO 18080 --- [inventory-service] [main] com.netflix.discovery.DiscoveryClient    : Single vip registry refresh property : null
+2026-06-08T16:57:07.335+05:30  INFO 18080 --- [inventory-service] [main] com.netflix.discovery.DiscoveryClient    : Force full registry fetch : false
+2026-06-08T16:57:07.335+05:30  INFO 18080 --- [inventory-service] [main] com.netflix.discovery.DiscoveryClient    : Application is null : false
+2026-06-08T16:57:07.335+05:30  INFO 18080 --- [inventory-service] [main] com.netflix.discovery.DiscoveryClient    : Registered Applications size is zero : true
+2026-06-08T16:57:07.335+05:30  INFO 18080 --- [inventory-service] [main] com.netflix.discovery.DiscoveryClient    : Application version is -1: true
+2026-06-08T16:57:07.335+05:30  INFO 18080 --- [inventory-service] [main] com.netflix.discovery.DiscoveryClient    : Getting all instance registry info from the eureka server
+2026-06-08T16:57:08.119+05:30  INFO 18080 --- [inventory-service] [main] com.netflix.discovery.DiscoveryClient    : The response status is 200
+2026-06-08T16:57:08.123+05:30  INFO 18080 --- [inventory-service] [main] com.netflix.discovery.DiscoveryClient    : Starting heartbeat executor: renew interval is: 10
+2026-06-08T16:57:08.127+05:30  INFO 18080 --- [inventory-service] [main] c.n.discovery.InstanceInfoReplicator     : InstanceInfoReplicator onDemand update allowed rate per min is 4
+2026-06-08T16:57:08.135+05:30  INFO 18080 --- [inventory-service] [main] com.netflix.discovery.DiscoveryClient    : Discovery Client initialized at timestamp 1780918028133 with initial instances count: 3
+2026-06-08T16:57:08.152+05:30  INFO 18080 --- [inventory-service] [DiscoveryClient-InstanceInfoReplicator-0] com.netflix.discovery.DiscoveryClient    : Saw local status change event StatusChangeEvent [timestamp=1780918028152, current=UP, previous=STARTING]
+2026-06-08T16:57:08.152+05:30  INFO 18080 --- [inventory-service] [DiscoveryClient-InstanceInfoReplicator-0] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_INVENTORY-SERVICE/inventory-service:872eb10db12db286622dca6e5b2270ac: registering service...
+2026-06-08T16:57:08.160+05:30  INFO 18080 --- [inventory-service] [main] o.s.c.n.e.s.EurekaServiceRegistry        : Registering application INVENTORY-SERVICE with eureka with status UP
+2026-06-08T16:57:08.162+05:30  WARN 18080 --- [inventory-service] [main] c.n.discovery.InstanceInfoReplicator     : Ignoring onDemand update due to rate limiter
+2026-06-08T16:57:08.207+05:30  INFO 18080 --- [inventory-service] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8083 (http) with context path ''
+2026-06-08T16:57:08.211+05:30  INFO 18080 --- [inventory-service] [main] .s.c.n.e.s.EurekaAutoServiceRegistration : Updating port to 8083
+2026-06-08T16:57:08.221+05:30  INFO 18080 --- [inventory-service] [DiscoveryClient-InstanceInfoReplicator-0] com.netflix.discovery.DiscoveryClient    : DiscoveryClient_INVENTORY-SERVICE/inventory-service:872eb10db12db286622dca6e5b2270ac - registration status: 204
+2026-06-08T16:57:08.244+05:30  INFO 18080 --- [inventory-service] [main] c.e.o.i.InventoryServiceApplication      : Started InventoryServiceApplication in 16.773 seconds (process running for 17.605)
+2026-06-08T17:02:07.353+05:30  INFO 18080 --- [inventory-service] [AsyncResolver-bootstrap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-06-08T17:07:07.355+05:30  INFO 18080 --- [inventory-service] [AsyncResolver-bootstrap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-06-08T17:12:07.368+05:30  INFO 18080 --- [inventory-service] [AsyncResolver-bootstrap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-06-08T17:17:07.382+05:30  INFO 18080 --- [inventory-service] [AsyncResolver-bootstrap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-06-08T17:22:07.398+05:30  INFO 18080 --- [inventory-service] [AsyncResolver-bootstrap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-06-08T17:27:07.409+05:30  INFO 18080 --- [inventory-service] [AsyncResolver-bootstrap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-06-08T17:32:07.422+05:30  INFO 18080 --- [inventory-service] [AsyncResolver-bootstrap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-06-08T17:37:07.426+05:30  INFO 18080 --- [inventory-service] [AsyncResolver-bootstrap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-06-08T17:42:07.439+05:30  INFO 18080 --- [inventory-service] [AsyncResolver-bootstrap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-06-08T17:47:07.454+05:30  INFO 18080 --- [inventory-service] [AsyncResolver-bootstrap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-06-08T17:48:20.438+05:30  INFO 18080 --- [inventory-service] [http-nio-8083-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-06-08T17:48:20.439+05:30  INFO 18080 --- [inventory-service] [http-nio-8083-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-06-08T17:48:20.462+05:30  INFO 18080 --- [inventory-service] [http-nio-8083-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 22 ms
+2026-06-08T17:48:20.585+05:30  INFO 18080 --- [inventory-service] [http-nio-8083-exec-1] c.e.o.i.controller.InventoryController   : REST request to initialize inventory for SKU: LAPTOP-001
+2026-06-08T17:48:20.603+05:30  INFO 18080 --- [inventory-service] [http-nio-8083-exec-1] c.e.o.i.s.impl.InventoryServiceImpl      : Initializing inventory for SKU: LAPTOP-001 with quantity: 100
+2026-06-08T17:48:20.775+05:30  WARN 18080 --- [inventory-service] [http-nio-8083-exec-1] c.e.o.i.s.impl.InventoryServiceImpl      : Inventory already exists for SKU: LAPTOP-001
+2026-06-08T17:48:20.775+05:30 DEBUG 18080 --- [inventory-service] [http-nio-8083-exec-1] c.e.o.i.s.impl.InventoryServiceImpl      : Checking stock for SKU: LAPTOP-001
+2026-06-08T17:49:24.569+05:30  INFO 18080 --- [inventory-service] [http-nio-8083-exec-3] c.e.o.i.controller.InventoryController   : REST request to initialize inventory for SKU: LAPTOP-001
+2026-06-08T17:49:24.571+05:30  INFO 18080 --- [inventory-service] [http-nio-8083-exec-3] c.e.o.i.s.impl.InventoryServiceImpl      : Initializing inventory for SKU: LAPTOP-001 with quantity: 100
+2026-06-08T17:49:24.574+05:30  WARN 18080 --- [inventory-service] [http-nio-8083-exec-3] c.e.o.i.s.impl.InventoryServiceImpl      : Inventory already exists for SKU: LAPTOP-001
+2026-06-08T17:49:24.574+05:30 DEBUG 18080 --- [inventory-service] [http-nio-8083-exec-3] c.e.o.i.s.impl.InventoryServiceImpl      : Checking stock for SKU: LAPTOP-001
+2026-06-08T17:52:07.470+05:30  INFO 18080 --- [inventory-service] [AsyncResolver-bootstrap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-06-08T17:57:07.470+05:30  INFO 18080 --- [inventory-service] [AsyncResolver-bootstrap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-06-08T18:01:31.226+05:30 ERROR 18080 --- [inventory-service] [http-nio-8083-exec-7] c.e.o.i.e.GlobalExceptionHandler         : Unexpected error occurred
+
+org.springframework.web.servlet.resource.NoResourceFoundException: No static resource api/auth/login.
+	at org.springframework.web.servlet.resource.ResourceHttpRequestHandler.handleRequest(ResourceHttpRequestHandler.java:585) ~[spring-webmvc-6.1.1.jar:6.1.1]
+	at org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter.handle(HttpRequestHandlerAdapter.java:52) ~[spring-webmvc-6.1.1.jar:6.1.1]
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089) ~[spring-webmvc-6.1.1.jar:6.1.1]
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979) ~[spring-webmvc-6.1.1.jar:6.1.1]
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014) ~[spring-webmvc-6.1.1.jar:6.1.1]
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914) ~[spring-webmvc-6.1.1.jar:6.1.1]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590) ~[tomcat-embed-core-10.1.16.jar:6.0]
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885) ~[spring-webmvc-6.1.1.jar:6.1.1]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658) ~[tomcat-embed-core-10.1.16.jar:6.0]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:205) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51) ~[tomcat-embed-websocket-10.1.16.jar:10.1.16]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-6.1.1.jar:6.1.1]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.1.jar:6.1.1]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-6.1.1.jar:6.1.1]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.1.jar:6.1.1]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:109) ~[spring-web-6.1.1.jar:6.1.1]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.1.jar:6.1.1]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-6.1.1.jar:6.1.1]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.1.jar:6.1.1]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:340) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1744) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at java.base/java.lang.Thread.run(Thread.java:1570) ~[na:na]
+
+2026-06-08T18:02:07.474+05:30  INFO 18080 --- [inventory-service] [AsyncResolver-bootstrap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-06-08T18:04:33.302+05:30  INFO 18080 --- [inventory-service] [http-nio-8083-exec-6] c.e.o.i.controller.InventoryController   : REST request to initialize inventory for SKU: LAPTOP-001
+2026-06-08T18:04:33.303+05:30  INFO 18080 --- [inventory-service] [http-nio-8083-exec-6] c.e.o.i.s.impl.InventoryServiceImpl      : Initializing inventory for SKU: LAPTOP-001 with quantity: 100
+2026-06-08T18:04:33.313+05:30  WARN 18080 --- [inventory-service] [http-nio-8083-exec-6] c.e.o.i.s.impl.InventoryServiceImpl      : Inventory already exists for SKU: LAPTOP-001
+2026-06-08T18:04:33.313+05:30 DEBUG 18080 --- [inventory-service] [http-nio-8083-exec-6] c.e.o.i.s.impl.InventoryServiceImpl      : Checking stock for SKU: LAPTOP-001
+2026-06-08T18:04:56.505+05:30  INFO 18080 --- [inventory-service] [http-nio-8083-exec-8] c.e.o.i.controller.InventoryController   : REST request to initialize inventory for SKU: LAPTOP-001
+2026-06-08T18:04:56.507+05:30  INFO 18080 --- [inventory-service] [http-nio-8083-exec-8] c.e.o.i.s.impl.InventoryServiceImpl      : Initializing inventory for SKU: LAPTOP-001 with quantity: 100
+2026-06-08T18:04:56.510+05:30  WARN 18080 --- [inventory-service] [http-nio-8083-exec-8] c.e.o.i.s.impl.InventoryServiceImpl      : Inventory already exists for SKU: LAPTOP-001
+2026-06-08T18:04:56.511+05:30 DEBUG 18080 --- [inventory-service] [http-nio-8083-exec-8] c.e.o.i.s.impl.InventoryServiceImpl      : Checking stock for SKU: LAPTOP-001
+2026-06-08T18:07:07.483+05:30  INFO 18080 --- [inventory-service] [AsyncResolver-bootstrap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-06-08T18:07:28.429+05:30  INFO 18080 --- [inventory-service] [http-nio-8083-exec-10] c.e.o.i.controller.InventoryController   : REST request to check stock for SKU: LAPTOP-001
+2026-06-08T18:07:28.431+05:30 DEBUG 18080 --- [inventory-service] [http-nio-8083-exec-10] c.e.o.i.s.impl.InventoryServiceImpl      : Checking stock for SKU: LAPTOP-001
+2026-06-08T18:08:55.544+05:30  INFO 18080 --- [inventory-service] [http-nio-8083-exec-2] c.e.o.i.controller.InventoryController   : REST request to reserve stock for SKU: MOBILE-001 quantity: 10
+2026-06-08T18:08:55.548+05:30  INFO 18080 --- [inventory-service] [http-nio-8083-exec-2] c.e.o.i.s.impl.InventoryServiceImpl      : Reserving 10 units for SKU: MOBILE-001
+2026-06-08T18:08:55.564+05:30 ERROR 18080 --- [inventory-service] [http-nio-8083-exec-2] c.e.o.i.e.GlobalExceptionHandler         : Inventory not found: Inventory not found for SKU: MOBILE-001
+2026-06-08T18:09:13.289+05:30  INFO 18080 --- [inventory-service] [http-nio-8083-exec-3] c.e.o.i.controller.InventoryController   : REST request to reserve stock for SKU: MOBILE-001 quantity: 10
+2026-06-08T18:09:13.290+05:30  INFO 18080 --- [inventory-service] [http-nio-8083-exec-3] c.e.o.i.s.impl.InventoryServiceImpl      : Reserving 10 units for SKU: MOBILE-001
+2026-06-08T18:09:13.296+05:30 ERROR 18080 --- [inventory-service] [http-nio-8083-exec-3] c.e.o.i.e.GlobalExceptionHandler         : Inventory not found: Inventory not found for SKU: MOBILE-001
+2026-06-08T18:09:34.844+05:30  INFO 18080 --- [inventory-service] [http-nio-8083-exec-4] c.e.o.i.controller.InventoryController   : REST request to reserve stock for SKU: LAPTOP-001 quantity: 10
+2026-06-08T18:09:34.845+05:30  INFO 18080 --- [inventory-service] [http-nio-8083-exec-4] c.e.o.i.s.impl.InventoryServiceImpl      : Reserving 10 units for SKU: LAPTOP-001
+2026-06-08T18:09:35.154+05:30  INFO 18080 --- [inventory-service] [http-nio-8083-exec-4] c.e.o.i.s.impl.InventoryServiceImpl      : Successfully reserved 10 units for SKU: LAPTOP-001
+2026-06-08T18:10:05.675+05:30  INFO 18080 --- [inventory-service] [http-nio-8083-exec-5] c.e.o.i.controller.InventoryController   : REST request to check stock for SKU: LAPTOP-001
+2026-06-08T18:10:05.676+05:30 DEBUG 18080 --- [inventory-service] [http-nio-8083-exec-5] c.e.o.i.s.impl.InventoryServiceImpl      : Checking stock for SKU: LAPTOP-001
+2026-06-08T18:10:23.349+05:30  INFO 18080 --- [inventory-service] [http-nio-8083-exec-7] c.e.o.i.controller.InventoryController   : REST request to check stock for SKU: MOBILE-001
+2026-06-08T18:10:23.350+05:30 DEBUG 18080 --- [inventory-service] [http-nio-8083-exec-7] c.e.o.i.s.impl.InventoryServiceImpl      : Checking stock for SKU: MOBILE-001
+2026-06-08T18:10:23.353+05:30 ERROR 18080 --- [inventory-service] [http-nio-8083-exec-7] c.e.o.i.e.GlobalExceptionHandler         : Inventory not found: Inventory not found for SKU: MOBILE-001
+2026-06-08T18:11:53.927+05:30 ERROR 18080 --- [inventory-service] [http-nio-8083-exec-9] c.e.o.i.e.GlobalExceptionHandler         : Unexpected error occurred
+
+org.springframework.web.HttpRequestMethodNotSupportedException: Request method 'GET' is not supported
+	at org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping.handleNoMatch(RequestMappingInfoHandlerMapping.java:265) ~[spring-webmvc-6.1.1.jar:6.1.1]
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodMapping.lookupHandlerMethod(AbstractHandlerMethodMapping.java:441) ~[spring-webmvc-6.1.1.jar:6.1.1]
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodMapping.getHandlerInternal(AbstractHandlerMethodMapping.java:382) ~[spring-webmvc-6.1.1.jar:6.1.1]
+	at org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping.getHandlerInternal(RequestMappingInfoHandlerMapping.java:126) ~[spring-webmvc-6.1.1.jar:6.1.1]
+	at org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping.getHandlerInternal(RequestMappingInfoHandlerMapping.java:68) ~[spring-webmvc-6.1.1.jar:6.1.1]
+	at org.springframework.web.servlet.handler.AbstractHandlerMapping.getHandler(AbstractHandlerMapping.java:507) ~[spring-webmvc-6.1.1.jar:6.1.1]
+	at org.springframework.web.servlet.DispatcherServlet.getHandler(DispatcherServlet.java:1283) ~[spring-webmvc-6.1.1.jar:6.1.1]
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1065) ~[spring-webmvc-6.1.1.jar:6.1.1]
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979) ~[spring-webmvc-6.1.1.jar:6.1.1]
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014) ~[spring-webmvc-6.1.1.jar:6.1.1]
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903) ~[spring-webmvc-6.1.1.jar:6.1.1]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564) ~[tomcat-embed-core-10.1.16.jar:6.0]
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885) ~[spring-webmvc-6.1.1.jar:6.1.1]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658) ~[tomcat-embed-core-10.1.16.jar:6.0]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:205) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51) ~[tomcat-embed-websocket-10.1.16.jar:10.1.16]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-6.1.1.jar:6.1.1]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.1.jar:6.1.1]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-6.1.1.jar:6.1.1]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.1.jar:6.1.1]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:109) ~[spring-web-6.1.1.jar:6.1.1]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.1.jar:6.1.1]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-6.1.1.jar:6.1.1]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.1.jar:6.1.1]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:340) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1744) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61) ~[tomcat-embed-core-10.1.16.jar:10.1.16]
+	at java.base/java.lang.Thread.run(Thread.java:1570) ~[na:na]
+
+2026-06-08T18:12:07.489+05:30  INFO 18080 --- [inventory-service] [AsyncResolver-bootstrap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-06-08T18:12:14.669+05:30  INFO 18080 --- [inventory-service] [http-nio-8083-exec-10] c.e.o.i.controller.InventoryController   : REST request to update stock for SKU: MOBILE-001
+2026-06-08T18:12:14.671+05:30  INFO 18080 --- [inventory-service] [http-nio-8083-exec-10] c.e.o.i.s.impl.InventoryServiceImpl      : Updating stock for SKU: MOBILE-001 with operation: ADD and quantity: 50
+2026-06-08T18:12:14.676+05:30 ERROR 18080 --- [inventory-service] [http-nio-8083-exec-10] c.e.o.i.e.GlobalExceptionHandler         : Inventory not found: Inventory not found for SKU: MOBILE-001
