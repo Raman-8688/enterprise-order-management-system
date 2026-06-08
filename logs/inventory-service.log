@@ -776,3 +776,5 @@ org.springframework.web.HttpRequestMethodNotSupportedException: Request method '
 2026-06-08T18:12:14.669+05:30  INFO 18080 --- [inventory-service] [http-nio-8083-exec-10] c.e.o.i.controller.InventoryController   : REST request to update stock for SKU: MOBILE-001
 2026-06-08T18:12:14.671+05:30  INFO 18080 --- [inventory-service] [http-nio-8083-exec-10] c.e.o.i.s.impl.InventoryServiceImpl      : Updating stock for SKU: MOBILE-001 with operation: ADD and quantity: 50
 2026-06-08T18:12:14.676+05:30 ERROR 18080 --- [inventory-service] [http-nio-8083-exec-10] c.e.o.i.e.GlobalExceptionHandler         : Inventory not found: Inventory not found for SKU: MOBILE-001
+2026-06-08T18:17:07.497+05:30  INFO 18080 --- [inventory-service] [AsyncResolver-bootstrap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
+2026-06-08T18:22:07.535+05:30  INFO 18080 --- [inventory-service] [AsyncResolver-bootstrap-executor-0] c.n.d.s.r.aws.ConfigClusterResolver      : Resolving eureka endpoints via configuration
