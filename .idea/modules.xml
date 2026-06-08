@@ -6,6 +6,8 @@
       <module fileurl="file://$PROJECT_DIR$/backend/auth-service/auth-service.iml" filepath="$PROJECT_DIR$/backend/auth-service/auth-service.iml" />
       <module fileurl="file://$PROJECT_DIR$/backend/discovery-server/discovery-server.iml" filepath="$PROJECT_DIR$/backend/discovery-server/discovery-server.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/enterprise-order-management-system.iml" filepath="$PROJECT_DIR$/.idea/enterprise-order-management-system.iml" />
+      <module fileurl="file://$PROJECT_DIR$/backend/inventory-service/inventory-service.iml" filepath="$PROJECT_DIR$/backend/inventory-service/inventory-service.iml" />
+      <module fileurl="file://$PROJECT_DIR$/backend/product-service/product-service.iml" filepath="$PROJECT_DIR$/backend/product-service/product-service.iml" />
     </modules>
   </component>
 </project>
