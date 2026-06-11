@@ -385,3 +385,90 @@ Responce:
 }
 
 
+
+TEST 10: Verify Kafka Events (Advanced)
+PS D:\enterprise-order-management-system\docker> docker exec kafka kafka-topics --bootstrap-server localhost:9092 --list
+order-created-events
+order-status-changed-events
+PS D:\enterprise-order-management-system\docker> 
+
+Consume messages from Kafka:
+PS D:\enterprise-order-management-system\docker> docker exec kafka kafka-console-consumer --bootstrap-server localhost:9092 --topic order-created-events --from-beg
+inning
+{"orderId":"9c005cfa-eab3-4e4e-96b1-ff57b23f1cad","orderNumber":"ORD-1781166678211","customerEmail":"test@example.com","totalAmount":3199.98,"timestamp":1781166678
+257}
+{"orderId":"ecd780c2-18f1-479e-a19b-4a1a0ccf4520","orderNumber":"ORD-1781166610345","customerEmail":"test@example.com","totalAmount":3199.98,"timestamp":1781166610
+674}
+|||| it's blink ok then in postman jsut create order
+{"orderId":"b5ad5b35-0673-4091-8159-e5309de09281","orderNumber":"ORD-1781175449391","customerEmail":"kafka-test@example.com","totalAmount":1599.99,"timestamp":1781
+175449865}
+{"orderId":"8c6cee96-f29d-4b0a-ab21-07b5cf2a8131","orderNumber":"ORD-1781175587058","customerEmail":"kafka-test@example.com","totalAmount":1599.99,"timestamp":1781
+175587129}
+
+Post: http://localhost:8080/api/orders
+{
+    "customerEmail": "kafka-test@example.com",
+    "customerName": "Kafka Tester",
+    "shippingAddress": "456 Test Avenue",
+    "items": [
+        {
+            "productSku": "LAPTOP-002",
+            "quantity": 1
+        }
+    ]
+}
+
+{
+    "id": "8c6cee96-f29d-4b0a-ab21-07b5cf2a8131",
+    "orderNumber": "ORD-1781175587058",
+    "customerEmail": "kafka-test@example.com",
+    "customerName": "Kafka Tester",
+    "shippingAddress": "456 Test Avenue",
+    "items": [
+        {
+            "productSku": "LAPTOP-002",
+            "productName": "Gaming Laptop",
+            "quantity": 1,
+            "unitPrice": 1599.99,
+            "subtotal": 1599.99
+        }
+    ],
+    "totalAmount": 1599.99,
+    "status": "CONFIRMED",
+    "paymentId": "PAY-1781175587128",
+    "failureReason": null,
+    "createdAt": "2026-06-11T16:29:47.13022",
+    "updatedAt": "2026-06-11T16:29:47.13622"
+}
+
+
+
+
+Q1: Why Kafka instead of direct HTTP calls?
+Answer:
+"Kafka provides asynchronous, decoupled communication. If Payment Service is down, 
+Order Service still works - events are stored in Kafka. When Payment Service recovers, it consumes pending events. 
+With HTTP, the order would fail immediately. Kafka also handles message replay - we can reprocess events if needed."
+Q2: What is a Topic?
+Answer:
+"A topic is like a folder or category for messages. In our system, order-created-events contains all order creation messages. 
+Topics can have multiple partitions for parallel processing - we configured 3 partitions for scalability."
+
+Q3: What happens if Kafka is down?
+Answer:
+
+"In production, Kafka runs in cluster mode (multiple servers). If one goes down, others take over. In our learning setup, 
+Order Service has circuit breakers - if Kafka is unavailable, the order still succeeds (event is retried later using retry template)."
+
+Q4: How is this better than a database?
+Answer:
+
+"A database is state (current data). Kafka is events (what happened). For microservices, events are more valuable - 
+we can replay them, audit them, and let services process at their own speed. Database would create tight coupling between services."
+
+
+
+
+
+
+
