@@ -1,0 +1,387 @@
+Post: http://localhost:8080/api/auth/login
+{
+    "email": "gateway@test.com",
+    "password": "password123"
+    
+}
+
+
+Responce:
+{
+    "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJnYXRld2F5QHRlc3QuY29tIiwiaWF0IjoxNzgxMTYyOTcwLCJleHAiOjE3ODEyNDkzNzB9.z4qyxC20EULJ7oXEp6gG-F4U_nbCOz7Q71fSS0GFH7vi7aDEYt1ecN933x-GVFc_Uu0j8W25Jr5Wvrpv590QGg",
+    "refreshToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJnYXRld2F5QHRlc3QuY29tIiwiaWF0IjoxNzgxMTYyOTcwLCJleHAiOjE3ODE3Njc3NzB9.AwGY3M7WWEtPAoNUY6LVCn1jIXjfSVEp5cP1LwaPNbhAEM6ZBxHV6SiOG6fIRFs9YlBQ6TvsjR7WsFaWbQztiQ",
+    "email": "gateway@test.com",
+    "message": "Login successful",
+    "success": false
+}
+
+Creation of product for new testing :
+
+POST http://localhost:8080/api/products
+Content-Type: application/json
+
+{
+    "sku": "LAPTOP-002",
+    "name": "Gaming Laptop",
+    "description": "High performance gaming laptop",
+    "price": 1599.99,
+    "brand": "BrandTech",
+    "category": "Electronics",
+    "stockQuantity": 100,
+    "createdBy": "gateway@test.com"
+}
+
+Responce: 
+{
+    "id": "be753a72-0b53-401d-8be1-ef9eb158ae2b",
+    "sku": "LAPTOP-002",
+    "name": "Gaming Laptop",
+    "description": "High performance gaming laptop",
+    "price": 1599.99,
+    "category": "Electronics",
+    "brand": "BrandTech",
+    "weight": null,
+    "dimensions": null,
+    "active": true,
+    "createdBy": "gateway@test.com",
+    "updatedBy": null,
+    "createdAt": null,
+    "updatedAt": null
+}
+
+
+
+Intilize INventory:
+
+Post: http://localhost:8080/api/inventory/initialize?sku=LAPTOP-002&quantity=50&location=WAREHOUSE_MAIN
+{
+    "sku": "LAPTOP-002",
+    "quantity": 50,
+    "reservedQuantity": 0,
+    "availableQuantity": 50,
+    "available": true,
+    "message": "Stock available",
+    "location": "WAREHOUSE_MAIN",
+    "minimumStockLevel": 5,
+    "reorderPoint": 10,
+    "needsReorder": false,
+    "lastRestockedAt": "2026-06-11T13:48:10.706886",
+    "updatedAt": "2026-06-11T13:48:11.321288"
+}
+
+Create Order (Saga Pattern Test - Success Case)
+
+POST http://localhost:8080/api/orders
+{
+    "customerEmail": "test@example.com",
+    "customerName": "Test User",
+    "shippingAddress": "123 Main Street, Bangalore 560001",
+    "items": [
+        {
+            "productSku": "LAPTOP-002",
+            "quantity": 2
+        }
+    ]
+}
+
+
+Responce:
+{
+    "id": "9c005cfa-eab3-4e4e-96b1-ff57b23f1cad",
+    "orderNumber": "ORD-1781166678211",
+    "customerEmail": "test@example.com",
+    "customerName": "Test User",
+    "shippingAddress": "123 Main Street, Bangalore 560001",
+    "items": [
+        {
+            "productSku": "LAPTOP-002",
+            "productName": "Gaming Laptop",
+            "quantity": 2,
+            "unitPrice": 1599.99,
+            "subtotal": 3199.98
+        }
+    ],
+    "totalAmount": 3199.98,
+    "status": "CONFIRMED",
+    "paymentId": "PAY-1781166678255",
+    "failureReason": null,
+    "createdAt": "2026-06-11T14:01:18.258116",
+    "updatedAt": "2026-06-11T14:01:18.263737"
+}
+
+
+
+Verify Inventory Was Reserved :
+After successful order, check inventory again:
+GET http://localhost:8080/api/inventory/LAPTOP-002
+Responce :
+{
+    "sku": "LAPTOP-002",
+    "quantity": 50,
+    "reservedQuantity": 2,
+    "availableQuantity": 48,
+    "available": true,
+    "message": "Stock available",
+    "location": "WAREHOUSE_MAIN",
+    "minimumStockLevel": 5,
+    "reorderPoint": 10,
+    "needsReorder": false,
+    "lastRestockedAt": "2026-06-11T13:48:10.706886",
+    "updatedAt": "2026-06-11T13:48:11.321288"
+}
+
+
+
+ TEST 4: Get Order Details
+ GET http://localhost:8080/api/orders/{order-id}
+9c005cfa-eab3-4e4e-96b1-ff57b23f1cad
+
+
+
+Responce:
+{
+    "id": "9c005cfa-eab3-4e4e-96b1-ff57b23f1cad",
+    "orderNumber": "ORD-1781166678211",
+    "customerEmail": "test@example.com",
+    "customerName": "Test User",
+    "shippingAddress": "123 Main Street, Bangalore 560001",
+    "items": [
+        {
+            "productSku": "LAPTOP-002",
+            "productName": "Gaming Laptop",
+            "quantity": 2,
+            "unitPrice": 1599.99,
+            "subtotal": 3199.98
+        }
+    ],
+    "totalAmount": 3199.98,
+    "status": "CONFIRMED",
+    "paymentId": "PAY-1781166678255",
+    "failureReason": null,
+    "createdAt": null,
+    "updatedAt": "2026-06-11T14:01:18.263737"
+}
+
+
+
+TEST 5: Get Orders by Customer Email
+GET http://localhost:8080/api/orders/customer/test@example.com
+
+[
+    {
+        "id": "ad219499-aab5-4883-a932-2a528f1a5ff4",
+        "orderNumber": "ORD-1781166063863",
+        "customerEmail": "test@example.com",
+        "customerName": "Test User",
+        "shippingAddress": "123 Main Street, Bangalore 560001",
+        "items": [
+            {
+                "productSku": "LAPTOP-001",
+                "productName": "Gaming Laptop",
+                "quantity": 2,
+                "unitPrice": 1499.99,
+                "subtotal": 2999.98
+            }
+        ],
+        "totalAmount": 2999.98,
+        "status": "FAILED",
+        "paymentId": null,
+        "failureReason": "Cannot invoke \"java.lang.Boolean.booleanValue()\" because the return value of \"com.enterprise.oms.order.dto.response.InventoryResponse.getInStock()\" is null",
+        "createdAt": null,
+        "updatedAt": "2026-06-11T13:51:04.569097"
+    },
+    {
+        "id": "0fec4fc3-7e02-4ebd-982d-1f803b040b72",
+        "orderNumber": "ORD-1781166077664",
+        "customerEmail": "test@example.com",
+        "customerName": "Test User",
+        "shippingAddress": "123 Main Street, Bangalore 560001",
+        "items": [
+            {
+                "productSku": "LAPTOP-002",
+                "productName": "Gaming Laptop",
+                "quantity": 2,
+                "unitPrice": 1599.99,
+                "subtotal": 3199.98
+            }
+        ],
+        "totalAmount": 3199.98,
+        "status": "FAILED",
+        "paymentId": null,
+        "failureReason": "Cannot invoke \"java.lang.Boolean.booleanValue()\" because the return value of \"com.enterprise.oms.order.dto.response.InventoryResponse.getInStock()\" is null",
+        "createdAt": null,
+        "updatedAt": "2026-06-11T13:51:17.721397"
+    },
+    {
+        "id": "ecd780c2-18f1-479e-a19b-4a1a0ccf4520",
+        "orderNumber": "ORD-1781166610345",
+        "customerEmail": "test@example.com",
+        "customerName": "Test User",
+        "shippingAddress": "123 Main Street, Bangalore 560001",
+        "items": [
+            {
+                "productSku": "LAPTOP-002",
+                "productName": "Gaming Laptop",
+                "quantity": 2,
+                "unitPrice": 1599.99,
+                "subtotal": 3199.98
+            }
+        ],
+        "totalAmount": 3199.98,
+        "status": "CONFIRMED",
+        "paymentId": "PAY-1781166610667",
+        "failureReason": null,
+        "createdAt": null,
+        "updatedAt": "2026-06-11T14:00:11.3232"
+    },
+    {
+        "id": "9c005cfa-eab3-4e4e-96b1-ff57b23f1cad",
+        "orderNumber": "ORD-1781166678211",
+        "customerEmail": "test@example.com",
+        "customerName": "Test User",
+        "shippingAddress": "123 Main Street, Bangalore 560001",
+        "items": [
+            {
+                "productSku": "LAPTOP-002",
+                "productName": "Gaming Laptop",
+                "quantity": 2,
+                "unitPrice": 1599.99,
+                "subtotal": 3199.98
+            }
+        ],
+        "totalAmount": 3199.98,
+        "status": "CONFIRMED",
+        "paymentId": "PAY-1781166678255",
+        "failureReason": null,
+        "createdAt": null,
+        "updatedAt": "2026-06-11T14:01:18.263737"
+    }
+]
+
+
+TEST 6: Get Orders by Status
+GET http://localhost:8080/api/orders/status/CONFIRMED?page=0&size=10
+{
+    "content": [
+        {
+            "id": "ecd780c2-18f1-479e-a19b-4a1a0ccf4520",
+            "orderNumber": "ORD-1781166610345",
+            "totalAmount": 3199.98,
+            "status": "CONFIRMED",
+            "createdAt": null
+        },
+        {
+            "id": "9c005cfa-eab3-4e4e-96b1-ff57b23f1cad",
+            "orderNumber": "ORD-1781166678211",
+            "totalAmount": 3199.98,
+            "status": "CONFIRMED",
+            "createdAt": null
+        }
+    ],
+    "pageable": {
+        "pageNumber": 0,
+        "pageSize": 10,
+        "sort": [
+            {
+                "direction": "DESC",
+                "property": "createdAt",
+                "ignoreCase": false,
+                "nullHandling": "NATIVE",
+                "descending": true,
+                "ascending": false
+            }
+        ],
+        "offset": 0,
+        "unpaged": false,
+        "paged": true
+    },
+    "totalElements": 2,
+    "totalPages": 1,
+    "last": true,
+    "size": 10,
+    "number": 0,
+    "sort": [
+        {
+            "direction": "DESC",
+            "property": "createdAt",
+            "ignoreCase": false,
+            "nullHandling": "NATIVE",
+            "descending": true,
+            "ascending": false
+        }
+    ],
+    "first": true,
+    "numberOfElements": 2,
+    "empty": false
+}
+
+TEST 7: Cancel Order
+ Post: http://localhost:8080/api/orders/ecd780c2-18f1-479e-a19b-4a1a0ccf4520/cancel
+Responce NO Content
+
+TEST 8: Create Order with Insufficient Stock (Failure Test)
+Post: http://localhost:8080/api/orders
+
+{
+    "customerEmail": "test@example.com",
+    "customerName": "Test User",
+    "shippingAddress": "123 Main Street",
+    "items": [
+        {
+            "productSku": "LAPTOP-002",
+            "quantity": 100
+        }
+    ]
+}
+
+Responce:
+
+{
+    "id": "9fdab53e-342d-4412-811d-48303b6616ed",
+    "orderNumber": "ORD-1781173469120",
+    "customerEmail": "test@example.com",
+    "customerName": "Test User",
+    "shippingAddress": "123 Main Street",
+    "items": [
+        {
+            "productSku": "LAPTOP-002",
+            "productName": "Gaming Laptop",
+            "quantity": 100,
+            "unitPrice": 1599.99,
+            "subtotal": 159999.00
+        }
+    ],
+    "totalAmount": 159999.00,
+    "status": "FAILED",
+    "paymentId": null,
+    "failureReason": "Insufficient stock for SKU: LAPTOP-002. Available: 48, Requested: 100",
+    "createdAt": "2026-06-11T15:54:29.323828",
+    "updatedAt": "2026-06-11T15:54:29.328831"
+}
+
+
+TEST 9: Create Order with Invalid Product
+Post: http://localhost:8080/api/orders
+{
+    "customerEmail": "test@example.com",
+    "customerName": "Test User",
+    "shippingAddress": "123 Main Street",
+    "items": [
+        {
+            "productSku": "INVALID-SKU",
+            "quantity": 1
+        }
+    ]
+}
+
+Responce: 
+{
+    "timestamp": "2026-06-11T16:14:23.4424132",
+    "status": 500,
+    "error": "Internal Server Error",
+    "message": "[404] during [GET] to [http://product-service/api/products/sku/INVALID-SKU] [ProductClient#getProductBySku(String)]: [{\"timestamp\":\"2026-06-11T16:14:23.4203897\",\"status\":404,\"error\":\"Product Not Found\",\"message\":\"Product not found with SKU: Product not found with SKU: INVALID-SKU\",\"path\":\"Unknown path\"}]",
+    "path": "Unknown path",
+    "validationErrors": null
+}
+
+
