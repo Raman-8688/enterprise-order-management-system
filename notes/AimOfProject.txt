@@ -1,0 +1,134 @@
+I want to  built an Enterprise Order Management System using Spring Boot microservices. 
+The system has to be separate services for authentication, users, products, inventory, orders, payments, notifications, and invoices. 
+I want to  use API Gateway for routing and JWT validation, Eureka for service discovery, 
+Config Server for centralized configuration, Feign for synchronous communication, Kafka for asynchronous events, and Resilience4j 
+for circuit breaker and fallback handling. Each service owns its own database, and order
+ processing follows the Saga pattern for distributed transaction management. 
+I also want dockerize the services and prepare Kubernetes manifests for deployment and scaling.
+
+
+First, Let's Fix Your Folder Structure (Production-Ready)
+Your current structure is good, but let's enhance it:
+
+text
+enterprise-order-management-system/
+├── backend/
+│   ├── config-server/          (Centralized config)
+│   ├── discovery-server/       (Eureka)
+│   ├── api-gateway/            (Spring Cloud Gateway)
+│   ├── auth-service/           (Authentication)
+│   ├── user-service/           (User management)
+│   ├── product-service/        (Products)
+│   ├── inventory-service/      (Inventory)
+│   ├── order-service/          (Orders + Saga orchestrator)
+│   ├── payment-service/        (Payments)
+│   ├── notification-service/   (Notifications)
+│   └── invoice-service/        (Invoices)
+├── frontend/                   (React/Angular - later)
+├── docker/
+│   ├── docker-compose.yml
+│   └── *.Dockerfile
+├── k8s/                       (Kubernetes manifests)
+├── docs/                      (API docs, architecture)
+└── scripts/                   (Build/deploy scripts)
+📦 Spring Boot Versions & Dependencies
+Use these versions (tested & compatible):
+
+Spring Boot: 3.2.0 or 3.2.1
+
+Java: 17 or 21 (LTS)
+
+Spring Cloud: 2023.0.0 (codename Leyton)
+
+Day 1: Project Initialization (TODAY)
+Create these 4 core infrastructure services first (they don't have business logic):
+
+1. Config Server (Port: 8888)
+bash
+Spring Initializr dependencies:
+- Config Server
+- Spring Boot Actuator
+application.properties:
+
+properties
+server.port=8888
+spring.cloud.config.server.git.uri=https://github.com/your-repo/config-repo
+spring.cloud.config.server.git.default-label=main
+2. Discovery Server (Eureka) (Port: 8761)
+bash
+Dependencies:
+- Eureka Server
+- Spring Boot Actuator
+3. API Gateway (Port: 8080)
+bash
+Dependencies:
+- Gateway
+- Eureka Client
+- Spring Boot Actuator
+- Resilience4j
+4. Auth Service (Port: 8081)
+bash
+Dependencies:
+- Spring Web
+- Spring Security
+- JWT (jjwt 0.12.3)
+- Eureka Client
+- Config Client
+- Spring Data JPA
+- PostgreSQL Driver
+- Lombok
+- Validation
+- Spring Boot Actuator
+📅 30-Day Implementation Plan
+Week 1: Foundation (Days 1-7)
+Day 1 (Today): Setup parent pom, config-server, discovery-server ✅
+
+Day 2: API Gateway with JWT validation, test routing
+
+Day 3: Auth service (JWT generation/validation)
+
+Day 4: User service with PostgreSQL
+
+Day 5: Dockerize these 4 services, test locally
+
+Day 6: Setup Kafka & Zookeeper in Docker
+
+Day 7: Implement Feign clients between services
+
+Week 2: Core Business Services (Days 8-14)
+Day 8-9: Product & Inventory services
+
+Day 10-11: Order service (without Saga yet)
+
+Day 12: Payment service integration
+
+Day 13: Database per service setup (PostgreSQL containers)
+
+Day 14: Integration testing & Circuit breakers (Resilience4j)
+
+Week 3: Advanced Patterns (Days 15-21)
+Day 15-16: Implement Saga pattern (Choreography with Kafka)
+
+Day 17: Notification & Invoice services
+
+Day 18: Distributed tracing (Micrometer + Zipkin)
+
+Day 19: Centralized logging (ELK stack)
+
+Day 20: API documentation (SpringDoc OpenAPI)
+
+Day 21: Performance testing & optimization
+
+Week 4: Production Readiness (Days 22-28)
+Day 22-23: Kubernetes manifests (Deployments, Services, ConfigMaps)
+
+Day 24: Horizontal Pod Autoscaling
+
+Day 25: SSL/TLS for API Gateway
+
+Day 26: Monitoring (Prometheus + Grafana)
+
+Day 27: CI/CD pipeline (GitHub Actions/Jenkins)
+
+Day 28: Security hardening & Backup strategies
+

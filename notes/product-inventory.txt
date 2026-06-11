@@ -1,0 +1,139 @@
+Main testing with product and invetory
+http://localhost:8080/api/auth/register
+no jwt set
+Content-Type: application/json
+{
+    "email": "raman@gmail.com",
+    "password": "raman123",
+    "firstName": "Raman",
+    "lastName": "B"
+}
+
+{
+    "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJyYW1hbkBnbWFpbC5jb20iLCJpYXQiOjE3ODA5MjA2NzYsImV4cCI6MTc4MTAwNzA3Nn0.iZdRkLik1KuTy_yALRokrRfSjlg6WnzSnuZ8a4Ov6G8yuezW2NOrjBnQXYsI4ecuRddZzGlUQfv9sN_uA2zisw",
+    "refreshToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJyYW1hbkBnbWFpbC5jb20iLCJpYXQiOjE3ODA5MjA2NzYsImV4cCI6MTc4MTUyNTQ3Nn0.4y8hMPb4AKQ-sWyEmVtnMsHI-HXMwxMFrepXmsq3nqDLm8FF9HkI8aj6d0RJGufq2sVJeNqJr3otvUGZS1GeLQ",
+    "email": "raman@gmail.com",
+    "message": "User registered successfully",
+    "success": false
+}
+---no jwt set
+Headers:
+Content-Type: application/json
+http://localhost:8080/api/auth/login
+{
+    "email": "raman@gmail.com",
+    "password": "raman123"
+
+}
+
+{
+
+eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJyYW1hbkBnbWFpbC5jb20iLCJpYXQiOjE3ODA5NzgzMjIsImV4cCI6MTc4MTA2NDcyMn0.Dw4KBMD4DZD_V4GGP-dQQ99G05Ge46EYdLh5MGg2fjkow_CljGhUWCFNDDPOf9ih52N85bO4M1elveKmHq7CLg",
+
+    "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJyYW1hbkBnbWFpbC5jb20iLCJpYXQiOjE3ODA5MjA4NjgsImV4cCI6MTc4MTAwNzI2OH0.cePA_Ib7ARLfMhzakYZ5Zz7KrXb0B-Kowzht6yRPMAkONNt9K-i2aiF_qiTWg_ChUmN021Hq7lyalE0bhzby8g",
+    "refreshToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJyYW1hbkBnbWFpbC5jb20iLCJpYXQiOjE3ODA5MjA4NjgsImV4cCI6MTc4MTUyNTY2OH0.nKLHxaAjBZStGnd_gNW4wmFfSR9ao9ScqvsyfXPnL_5zV54ZLL56ArVApYi8ZZKvZ03n8qCJSnGGxTYLHumiYg",
+    "email": "raman@gmail.com",
+    "message": "Login successful",
+    "success": false
+}
+
+
+
+
+
+# 3. Initialize inventory for a product (via Gateway)
+POST http://localhost:8080/api/inventory/initialize?sku=LAPTOP-001&quantity=100&location=WAREHOUSE_MAIN
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+# Expected Response:
+{
+    "sku": "LAPTOP-001",
+    "quantity": 100,
+    "reservedQuantity": 0,
+    "availableQuantity": 100,
+    "available": true,
+    "location": "WAREHOUSE_MAIN",
+    "minimumStockLevel": 5,
+    "reorderPoint": 10,
+    "needsReorder": false
+}
+
+
+ "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJyYW1hbkBnbWFpbC5jb20iLCJpYXQiOjE3ODA5MjE5MDksImV4cCI6MTc4MTAwODMwOX0.CXhSydsjUTW4qLFs2zmFKC38ue_wsaNdt31U829P17dcE-IFrpndOcQRAWIH1Ml64MK11n1BY1TviuzKCu4QHw",
+
+
+
+# 4. Create a product (via Gateway)
+POST http://localhost:8080/api/products
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+Content-Type: application/json
+
+{
+    "sku": "LAPTOP-001",
+    "name": "Gaming Laptop",
+    "description": "High performance gaming laptop",
+    "price": 1499.99,
+    "category": "Electronics",
+    "brand": "TechBrand",
+    "weight": 2.5,
+    "dimensions": "35x25x2 cm",
+    "createdBy": "test@example.com"
+}
+
+# Expected Response (201 Created):
+{
+    "id": "product-uuid-here",
+    "sku": "LAPTOP-001",
+    "name": "Gaming Laptop",
+    "price": 1499.99,
+    "active": true
+}
+
+
+
+
+# 5. Get product stock status - THIS TESTS FEIGN COMMUNICATION!
+# Product Service will call Inventory Service internally via Feign
+GET http://localhost:8080/api/products/LAPTOP-001/stock-status
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+# Expected Response:
+{
+    "sku": "LAPTOP-001",
+    "productName": "Gaming Laptop",
+    "productActive": true,
+    "inventoryAvailable": true,
+    "availableQuantity": 125,
+    "message": "Stock available",
+    "circuitBreakerOpen": false
+}
+ GET : http://localhost:8080/api/products/KEYBOARD-001/stock-status
+{
+    "sku": "KEYBOARD-001",
+    "productName": "Key-F1",
+    "productActive": true,
+    "inventoryAvailable": true,
+    "availableQuantity": 100,
+    "message": "Stock available",
+    "circuitBreakerOpen": false
+}
+
+
+
+# 1. Stop Inventory Service (Ctrl+C in inventory-service terminal)
+
+# 2. Call product stock status (Product will try to call Inventory via Feign)
+GET http://localhost:8080/api/products/LAPTOP-001/stock-status
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+# Expected Response (Fallback):
+{
+    "sku": "LAPTOP-001",
+    "productName": "Gaming Laptop",
+    "productActive": true,
+    "inventoryAvailable": false,
+    "availableQuantity": 0,
+    "message": "Inventory service temporarily unavailable. Please try again later.",
+    "circuitBreakerOpen": true
+}
+

@@ -1,0 +1,133 @@
+Method: POST
+URL: http://localhost:8081/api/auth/register
+Headers: 
+    Content-Type: application/json
+
+Body (raw JSON):
+{
+    "email": "john.doe@example.com",
+    "password": "password123",
+    "firstName": "John",
+    "lastName": "Doe"
+}
+
+----success it's fine----
+Login:----
+---we must select no auth and if your enter token that must be valid
+Method: POST
+URL: http://localhost:8081/api/auth/login
+Headers: Content-Type: application/json
+
+Body:
+{
+    "email": "john.doe@example.com",
+    "password": "password123"
+}
+
+--{
+    "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqb2huLmRvZUBleGFtcGxlLmNvbSIsImlhdCI6MTc4MDcyNTQ0NywiZXhwIjoxNzgwODExODQ3fQ.4KQqsYqhrYNu__rzYEYQJ-HnUJYQdd0vUNSwanWnumKpngJFmJanM-2YxuHcz9H6ocxL_xalZWu_7jxjt0mChw",
+    "refreshToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqb2huLmRvZUBleGFtcGxlLmNvbSIsImlhdCI6MTc4MDcyNTQ0NywiZXhwIjoxNzgxMzMwMjQ3fQ.Z3x3EFNmoQ9iMXm0GsE4MTD7GWDBu9_DWtf-a4uFvQY60xBqQBT2h-USDnrV0ltZ4xvWZ1MmgV_pcndjrxzglw",
+    "email": "john.doe@example.com",
+    "message": "Login successful",
+    "success": false
+}--fine success 
+
+
+--
+
+
+Validation token--
+Validate Token (Copy token from login response)
+Method: POST
+URL: http://localhost:8081/api/auth/validate
+Headers:
+    Authorization: Bearer eyJhbGciOiJIUzI1NiJ9...----access token here
+    Content-Type: application/json
+
+{
+    "valid": true,
+    "email": "john.doe@example.com",
+    "message": "Token is valid"
+}---so success it's fine--
+
+---
+
+Test 4: Get User Details
+text
+Method: GET
+URL: http://localhost:8081/api/auth/user/john.doe@example.com
+Headers:
+    Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+--{
+    "email": "john.doe@example.com",
+    "firstName": "John",
+    "lastName": "Doe",
+    "role": "USER",
+    "createdAt": "2026-06-06T11:25:00.791432"
+}
+======
+
+NOw From api gate way--
+
+url:  http://localhost:8080/api/auth/register
+
+{
+    "email": "gateway@test.com",
+    "password": "password123",
+    "firstName": "Gateway",
+    "lastName": "Test"
+}
+
+{
+    "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJnYXRld2F5QHRlc3QuY29tIiwiaWF0IjoxNzgwNzI3MzQzLCJleHAiOjE3ODA4MTM3NDN9.qTK4cqPZTIxVfFr3Unw-v2vfAI4yDhuIMPF3pBI2GF5rGluDuNcDF5eggFIkAHixgvpQlorHADA-mLD_Cl5ixw",
+    "refreshToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJnYXRld2F5QHRlc3QuY29tIiwiaWF0IjoxNzgwNzI3MzQzLCJleHAiOjE3ODEzMzIxNDN9.3bYeFB-EJMQdLw-8-y49oQb3tBWGuFZpu94yzoN4z289C8kDm77pToQ4hCGMWNpqI5f4jA9JZ6CDcT6ccgY6-w",
+    "email": "gateway@test.com",
+    "message": "User registered successfully",
+    "success": false
+}
+==for login using gateway:
+
+ http://localhost:8080/api/auth/login
+{
+    "email": "gateway@test.com",
+    "password": "password123"
+    
+}
+
+
+
+{
+    "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJnYXRld2F5QHRlc3QuY29tIiwiaWF0IjoxNzgwNzI3NDgzLCJleHAiOjE3ODA4MTM4ODN9.X9Dr93jdJElNsxQbkIV4ogJIU1gRvFADZ5E2a4izuKuJkpLjFsbcTTE25uGv_E6Tdrsh_QfdfO-JY23bQ0bjRw",
+    "refreshToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJnYXRld2F5QHRlc3QuY29tIiwiaWF0IjoxNzgwNzI3NDgzLCJleHAiOjE3ODEzMzIyODN9.WHom5ZETLgXWu84bzRtD_95LDPK_XTzSZfKOrh_30vQ5JjB_V5PMb5EllmInnrFoa8AN2rAw7ypLQHo2r3Xp7g",
+    "email": "gateway@test.com",
+    "message": "Login successful",
+    "success": false
+}
+===Validation 
+ http://localhost:8080/api/auth/validate
+Post method: no body
+responce:
+Gateway validation of authservice:
+{
+    "valid": true,
+    "email": "gateway@test.com",
+    "message": "Token is valid"
+}
+
+
+===get user detaisl:
+ http://localhost:8080/api/auth/user/gateway@test.com
+{
+    "email": "gateway@test.com",
+    "firstName": "Gateway",
+    "lastName": "Test",
+    "role": "USER",
+    "createdAt": "2026-06-06T11:59:03.08146"
+}
+---all getuser detaisl and validation need to accesstoken ok except logi and register only do't need 
+
+
+ "accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJnYXRld2F5QHRlc3QuY29tIiwiaWF0IjoxNzgwNzI4MzIzLCJleHAiOjE3ODA4MTQ3MjN9.Ax1BfTi4B0umgQZM-Apzp_NFlyyFvB-fju9nK7KFkcjSGosCc2ZQKwXtyYV7HjEFga88cSOuE56FZbBA1S_zyA",
+    "refreshToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJnYXRld2F5QHRlc3QuY29tIiwiaWF0IjoxNzgwNzI4MzIzLCJleHAiOjE3ODEzMzMxMjN9.xuPRWtvkWdXYcwe5pTtT8x6zIZUQeQ7T8GFDJAGZVc2JCgsV4KyJ05DYqpiSXjwvOPQ5nNQ6XlSqq1CLKuuupQ",
+
