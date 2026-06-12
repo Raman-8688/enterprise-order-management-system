@@ -2,6 +2,8 @@ package com.enterprise.oms.gateway.controller;
 
 
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
@@ -19,5 +21,23 @@ public class FallbackController {
         response.put("message", "Auth service is temporarily unavailable. Please try again later.");
         response.put("timestamp", System.currentTimeMillis());
         return Mono.just(response);
+    }
+
+    @RequestMapping("/fallback/orders")
+    public ResponseEntity<Map<String, Object>> ordersFallback() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "DOWN");
+        response.put("message", "Order Service is currently unavailable. Please try again later.");
+        response.put("timestamp", System.currentTimeMillis());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
+    }
+
+    @RequestMapping("/fallback/payments")
+    public ResponseEntity<Map<String, Object>> paymentsFallback() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "DOWN");
+        response.put("message", "Payment Service is currently unavailable. Please try again later.");
+        response.put("timestamp", System.currentTimeMillis());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
     }
 }

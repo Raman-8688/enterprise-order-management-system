@@ -1,2 +1,8 @@
-package com.enterprise.oms.payment.service;public interface PaymentService {
+package com.enterprise.oms.payment.service;
+
+import com.enterprise.oms.payment.dto.event.OrderCreatedEvent;
+import com.enterprise.oms.payment.model.Payment;
+
+public interface PaymentService {
+    Payment processPayment(OrderCreatedEvent event);
 }

@@ -48,6 +48,22 @@ spring:
               args:
                 name: orderService
                 fallbackUri: forward:/fallback/orders
+        #  Payment Service Routes
+        - id: payment-service
+          uri: lb://PAYMENT-SERVICE
+          predicates:
+            - Path=/api/payments/**
+          filters:
+            - StripPrefix=0
+            - name: CircuitBreaker
+              args:
+                name: paymentService
+                fallbackUri: forward:/fallback/payments
+        # Fallback routes
+        - id: fallback-route
+          uri: forward:/fallback
+          predicates:
+            - Path=/fallback/**
 
 # JWT Configuration (must match auth-service)
 jwt:

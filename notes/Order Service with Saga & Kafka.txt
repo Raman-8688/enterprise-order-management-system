@@ -1,0 +1,616 @@
+# Navigate to docker directory
+cd D:\enterprise-order-management-system\docker
+
+# Start Kafka and Zookeeper
+docker-compose -f docker-compose-kafka.yml up -d
+
+# Wait 10 seconds for containers to initialize
+Start-Sleep -Seconds 10
+
+# Verify containers are running
+docker ps
+
+# Check Kafka is ready
+docker exec kafka kafka-topics --bootstrap-server localhost:9092 --list
+
+ Day 4 Complete: Teacher's Guide to Order Service with Saga & Kafka
+Congratulations! You've successfully completed Day 4. Let me explain everything you built today, step by step, like a teacher.
+
+📚 PART 1: WHAT YOU BUILT TODAY (Simple Overview)
+The Big Picture
+text
+BEFORE DAY 4 (3 services):
+├── Auth Service (login)
+├── Product Service (products)  
+├── Inventory Service (stock)
+└── Users couldn't place orders ❌
+
+AFTER DAY 4 (4 services):
+├── Auth Service (login)
+├── Product Service (products)
+├── Inventory Service (stock)
+├── Order Service (orders) ✅ NEW
+└── Kafka (events) ✅ NEW
+
+NOW: Users can place orders! 🎉
+What Happens When User Places an Order?
+text
+Step 1: User clicks "Place Order"
+        ↓
+Step 2: Order Service gets request
+        ↓
+Step 3: Calls Product Service → Gets price
+        ↓
+Step 4: Calls Inventory Service → Reserves stock
+        ↓
+Step 5: Processes payment (simulated)
+        ↓
+Step 6: Order CONFIRMED ✅
+        ↓
+Step 7: Publishes event to Kafka
+        ↓
+Step 8: (Tomorrow) Other services react
+📚 PART 2: KEY MICROSERVICES CONCEPTS YOU IMPLEMENTED
+1. Service Discovery (Eureka)
+What is it? A phonebook for microservices.
+
+Without Eureka:
+
+java
+// HARDCODED URL - This is BAD!
+ProductClient productClient = new ProductClient("http://localhost:8082");
+With Eureka (What you built):
+
+java
+// Service finds each other by NAME - This is GOOD!
+@FeignClient(name = "product-service")  // Just the name!
+public interface ProductClient {
+    // Eureka finds where product-service is running
+}
+Why important? In production, services move, scale, crash. Eureka tracks them automatically.
+
+Your code:
+
+java
+// OrderServiceApplication.java
+@EnableDiscoveryClient  // ← This registers with Eureka
+public class OrderServiceApplication { }
+yaml
+# application.yml
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/  # Where Eureka lives
+    register-with-eureka: true  # Tell Eureka "I exist!"
+2. API Gateway (Spring Cloud Gateway)
+What is it? A single door to all services.
+
+Without Gateway:
+
+text
+Product Service: http://localhost:8082/api/products
+Inventory Service: http://localhost:8083/api/inventory
+Order Service: http://localhost:8084/api/orders
+Auth Service: http://localhost:8081/api/auth
+
+Client needs to remember 4 different URLs! 😫
+With Gateway (What you built):
+
+text
+ALL services: http://localhost:8080/api/...
+- /api/products → goes to Product Service
+- /api/inventory → goes to Inventory Service  
+- /api/orders → goes to Order Service
+- /api/auth → goes to Auth Service
+
+Client remembers ONE URL! 😊
+Your code:
+
+yaml
+# api-gateway/application.yml
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: order-service
+          uri: lb://ORDER-SERVICE  # 'lb' = Load Balancer
+          predicates:
+            - Path=/api/orders/**   # If URL starts with /api/orders
+          filters:
+            - StripPrefix=0          # Send full path to service
+3. Feign Client (Declarative REST)
+What is it? A way to call other services as if they're local methods.
+
+Without Feign (Traditional REST):
+
+java
+// UGLY! So much boilerplate
+RestTemplate restTemplate = new RestTemplate();
+String url = "http://product-service/api/products/sku/" + sku;
+ProductResponse product = restTemplate.getForObject(url, ProductResponse.class);
+With Feign (What you built):
+
+java
+// BEAUTIFUL! Looks like a normal method call
+@FeignClient(name = "product-service")
+public interface ProductClient {
+    @GetMapping("/api/products/sku/{sku}")
+    ProductResponse getProductBySku(@PathVariable("sku") String sku);
+}
+
+// Using it:
+ProductResponse product = productClient.getProductBySku("LAPTOP-002");
+4. Resilience4j (Circuit Breaker)
+What is it? A safety net for service failures.
+
+Problem it solves:
+
+text
+Order Service → calls → Product Service (SLOW/DOWN)
+Without Circuit Breaker: Order Service waits... and waits... TIMEOUT!
+With Circuit Breaker: Quickly fails and uses fallback
+Your code:
+
+java
+@FeignClient(name = "product-service", fallback = ProductClientFallback.class)
+public interface ProductClient { }
+
+// Fallback when Product Service is down
+@Component
+public class ProductClientFallback implements ProductClient {
+    @Override
+    public ProductResponse getProductBySku(String sku) {
+        // Return default data instead of failing
+        return ProductResponse.builder()
+                .name("Product Unavailable")
+                .price(BigDecimal.ZERO)
+                .build();
+    }
+}
+Circuit Breaker States:
+
+text
+CLOSED (Normal) → Calls go through
+     ↓ (50% failures)
+OPEN (Broken) → Calls fail immediately, don't wait
+     ↓ (After 5 seconds)
+HALF-OPEN (Testing) → Try one call
+     ↓ (If success)
+CLOSED (Back to normal)
+📚 PART 3: KAFKA DEEP DIVE (Most Important!)
+What is Kafka?
+Simple Answer: Kafka is a message bus where services can send and receive messages asynchronously.
+
+Analogy: Email vs Phone Call
+
+Phone Call (Synchronous)	Email (Asynchronous/Kafka)
+Must talk immediately	Can read when free
+If person busy, call fails	Email stored, read later
+Both must be on call	Can be processed anytime
+One-to-one	One-to-many
+Kafka = Email for Microservices!
+
+Why Do MNCs Use Kafka?
+Company	How They Use Kafka	Why Kafka?
+Uber	Matching riders with drivers	Millions of events per second
+Netflix	What you watch → recommendations	500 billion events daily
+Walmart	Inventory updates across 5000 stores	Real-time stock sync
+LinkedIn	Job alerts, connection suggestions	1 million+ messages/sec
+Kafka vs Direct HTTP (Important!)
+text
+DIRECT HTTP (What you DIDN'T use for everything):
+Order → Payment → Notification → Invoice
+If Payment fails, Order fails! If Notification slow, Order slow!
+
+KAFKA (What you DID use for events):
+Order → [Kafka] → Payment (consumes when ready)
+              → Notification (consumes when ready)
+              → Invoice (consumes when ready)
+If one service fails, others keep working!
+Is Saga Pattern Part of Kafka?
+NO! They are separate but often work together.
+
+Concept	What it is	Do you need Kafka?
+Saga Pattern	How to handle multi-service transactions	NO - can use HTTP
+Kafka	How services communicate async	NO - can use HTTP
+Your implementation:
+
+text
+Saga (using HTTP/Feign):
+Order → reserve inventory (HTTP) → process payment (HTTP) → confirm (HTTP)
+
+Kafka (async event):
+Order → publish event → other services consume later
+Kafka Code You Wrote (Line by Line)
+Dependency (pom.xml):
+
+xml
+<dependency>
+    <groupId>org.springframework.kafka</groupId>
+    <artifactId>spring-kafka</artifactId>
+</dependency>
+<!-- This brings Kafka client library -->
+Configuration (KafkaConfig.java):
+
+java
+@Configuration
+public class KafkaConfig {
+    @Bean
+    public NewTopic orderCreatedTopic() {
+        return TopicBuilder.name("order-created-events")
+                .partitions(3)        // Can process 3 messages in parallel
+                .replicas(1)          // 1 copy (in production, set to 3)
+                .build();
+    }
+}
+Producer (OrderEventPublisher.java):
+
+java
+@Component
+public class OrderEventPublisher {
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+    
+    public void publishOrderCreatedEvent(Order order) {
+        OrderCreatedEvent event = OrderCreatedEvent.builder()
+                .orderId(order.getId())
+                .totalAmount(order.getTotalAmount())
+                .build();
+        
+        // Send to Kafka!
+        kafkaTemplate.send("order-created-events", order.getId(), event);
+    }
+}
+Application.yml:
+
+yaml
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092  # Where Kafka lives
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+📚 PART 4: SAGA PATTERN DEEP DIVE
+What is Saga Pattern?
+Problem: You need to create an order that spans 3 services. If one fails, how to rollback?
+
+Solution: Break into steps, each with a "compensation" (undo) action.
+
+Your Saga Implementation
+java
+public Order processOrder(CreateOrderRequest request) {
+    // STEP 1: Create order (PENDING)
+    Order order = createOrder();
+    
+    try {
+        // STEP 2: Reserve inventory (with compensation)
+        reserveInventory(order);  // ← If fails, go to compensation
+        
+        // STEP 3: Process payment (with compensation)
+        processPayment(order);
+        
+        // STEP 4: Confirm order
+        order.setStatus(CONFIRMED);
+        
+    } catch (Exception e) {
+        // COMPENSATION: Undo everything!
+        releaseInventory(order);  // ← Put stock back
+        order.setStatus(FAILED);  // ← Mark as failed
+    }
+    
+    return order;
+}
+Saga vs Traditional Transaction
+Traditional (2PC)	Saga (Your implementation)
+Locks database rows	No locks
+Slow (waits for all)	Fast (doesn't wait)
+All succeed or all fail	Partial success possible
+Good for banking	Good for e-commerce
+📚 PART 5: COMPLETE PROJECT CONNECTION MAP
+How All Pieces Connect
+text
+                    ┌─────────────────────────────────────┐
+                    │         POSTMAN (Client)             │
+                    └─────────────────┬───────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────────┐
+                    │     API GATEWAY (Port 8080)          │
+                    │  "I'm the front door"                │
+                    │  - JWT validation                    │
+                    │  - Route to services                 │
+                    └─────────────────┬───────────────────┘
+                                      │
+            ┌─────────────────────────┼─────────────────────────┐
+            │                         │                         │
+            ▼                         ▼                         ▼
+    ┌───────────────┐        ┌───────────────┐        ┌───────────────┐
+    │ Auth Service  │        │Product Service│        │Inventory Svc  │
+    │ (Port 8081)   │        │ (Port 8082)   │        │ (Port 8083)   │
+    │ "Who are you?"│        │ "Product info"│        │ "Stock info"  │
+    └───────────────┘        └───────┬───────┘        └───────┬───────┘
+                                    │                         │
+                                    │     Feign Calls         │
+                                    └───────────┬─────────────┘
+                                                │
+                                                ▼
+                                    ┌───────────────────────┐
+                                    │   ORDER SERVICE       │
+                                    │   (Port 8084)         │
+                                    │   "Process orders"    │
+                                    │                       │
+                                    │  ┌─────────────────┐  │
+                                    │  │Saga Orchestrator│  │
+                                    │  │ 1. Create order │  │
+                                    │  │ 2. Reserve inv  │  │
+                                    │  │ 3. Process pay  │  │
+                                    │  │ 4. Confirm      │  │
+                                    │  └─────────────────┘  │
+                                    └───────────┬───────────┘
+                                                │
+                                                │ Kafka Event
+                                                ▼
+                                    ┌───────────────────────┐
+                                    │   KAFKA (Port 9092)   │
+                                    │   "Event bus"         │
+                                    │                       │
+                                    │  Topic:               │
+                                    │  order-created-events │
+                                    └───────────────────────┘
+                                                │
+                                                │ (Tomorrow)
+                                                ▼
+                                    ┌───────────────────────┐
+                                    │   Payment Service      │
+                                    │   "Consumes events"    │
+                                    └───────────────────────┘
+Service Discovery (Eureka) - Central Registry
+text
+                    ┌─────────────────────────────────────┐
+                    │         EUREKA (Port 8761)           │
+                    │      "Where is everyone?"            │
+                    │                                      │
+                    │  Registered Services:                │
+                    │  ├── API-GATEWAY:8080               │
+                    │  ├── AUTH-SERVICE:8081              │
+                    │  ├── PRODUCT-SERVICE:8082           │
+                    │  ├── INVENTORY-SERVICE:8083         │
+                    │  └── ORDER-SERVICE:8084  ✅ NEW     │
+                    └─────────────────────────────────────┘
+                         ▲          ▲          ▲
+                         │          │          │
+                    Register    Register    Register
+                         │          │          │
+                    ┌────┴────┐ ┌───┴────┐ ┌───┴────┐
+                    │Product  │ │Inventory│ │ Order  │
+                    │Service  │ │Service  │ │Service │
+                    └─────────┘ └────────┘ └────────┘
+📚 PART 6: WHAT'S NEXT (Day 5 Preview)
+Today You Did:
+text
+✅ Order Service with Saga
+✅ Kafka Producer (sending events)
+✅ Integration with Product & Inventory
+Tomorrow You'll Do:
+text
+📅 Payment Service (Kafka Consumer)
+   - Listen to order-created-events
+   - Process real payments
+   - Publish payment status
+
+📅 Complete Saga Flow:
+   Order → Inventory → Payment → Order confirmed
+   
+📅 Notification Service:
+   - Send email when order is confirmed
+   - Send SMS for payment success
+Remaining Code to Complete Kafka:
+You have PRODUCER (sending): ✅ Done
+
+java
+kafkaTemplate.send("order-created-events", event);
+You need CONSUMER (receiving): ⏳ Tomorrow
+
+java
+@KafkaListener(topics = "order-created-events")
+public void handleOrderCreated(OrderCreatedEvent event) {
+    // Process payment
+    // Send notification
+}
+📚 PART 7: QUICK REFERENCE - CODE PATTERNS YOU'LL REUSE
+Pattern 1: New Service Template (Copy for next service)
+java
+// 1. Main Application
+@SpringBootApplication
+@EnableDiscoveryClient
+@EnableFeignClients
+public class NewServiceApplication { }
+
+// 2. Entity
+@Entity
+public class Entity { @Id @GeneratedValue private Long id; }
+
+// 3. Repository
+public interface EntityRepository extends JpaRepository<Entity, Long> { }
+
+// 4. Service
+@Service
+public class EntityService { }
+
+// 5. Controller
+@RestController
+@RequestMapping("/api/entities")
+public class EntityController { }
+
+// 6. Feign Client (to call other services)
+@FeignClient(name = "other-service")
+public interface OtherClient { }
+
+// 7. Kafka Producer (to send events)
+@Component
+public class EventPublisher {
+    @Autowired
+    private KafkaTemplate<String, Object> kafkaTemplate;
+    
+    public void publish(Event event) {
+        kafkaTemplate.send("topic-name", event);
+    }
+}
+Pattern 2: Saga Template (For any distributed transaction)
+java
+public Result doTransaction(Request request) {
+    // 1. Create pending record
+    Record record = createPending(request);
+    
+    try {
+        // 2. Call first service
+        callService1(record);
+        
+        // 3. Call second service
+        callService2(record);
+        
+        // 4. Confirm success
+        record.setStatus(SUCCESS);
+        
+    } catch (Exception e) {
+        // 5. Compensation: Undo step 2
+        undoService2(record);
+        
+        // 6. Compensation: Undo step 1  
+        undoService1(record);
+        
+        record.setStatus(FAILED);
+    }
+    
+    return record;
+}
+Pattern 3: Kafka Event Template (For any event)
+java
+// 1. Event DTO
+public class BusinessEvent {
+    private String id;
+    private String type;
+    private LocalDateTime timestamp;
+}
+
+// 2. Publish event
+@Component
+public class EventPublisher {
+    public void publish(BusinessEvent event) {
+        kafkaTemplate.send("business-events", event);
+    }
+}
+
+// 3. Consume event (tomorrow)
+@Component  
+public class EventConsumer {
+    @KafkaListener(topics = "business-events")
+    public void consume(BusinessEvent event) {
+        // Process event
+    }
+}
+📚 PART 8: INTERVIEW PREPARATION - KEY ANSWERS
+Q: How does Order Service find Product Service?
+A: "Using Eureka Service Discovery. Order Service knows Product Service by name (product-service), not by IP. Eureka maintains a registry of all services and their locations. When Order Service calls productClient.getProduct(), Feign asks Eureka 'Where is product-service?' and gets the address."
+
+Q: What happens if Inventory Service is down?
+A: "Resilience4j Circuit Breaker kicks in. After 5 failures, the circuit opens. Subsequent calls fail immediately without waiting for timeout. The fallback returns default data (stock unavailable), and order creation fails gracefully with proper error message."
+
+Q: Why did you choose Kafka over RabbitMQ?
+A: "For our use case, Kafka's message persistence (messages stay for 7 days) and replay capability (can reprocess events) are valuable. If Payment Service is down for 2 hours, it can replay all missed orders when back up. Kafka also handles high throughput - Netflix processes 500 billion events daily."
+
+Q: Explain the Saga pattern you implemented.
+A: "Our Saga has 4 steps: 1) Create pending order, 2) Reserve inventory, 3) Process payment, 4) Confirm order. Each step has a compensation: if payment fails, we release inventory and mark order failed. This ensures eventual consistency without distributed locks."
+
+Q: How do you test this system?
+A: "Three levels: Unit tests for business logic, Integration tests with Testcontainers for Kafka/PostgreSQL, End-to-end via Postman. We also test failure scenarios: service down, insufficient stock, invalid products."
+
+✅ CHECKLIST: WHAT YOU MASTERED TODAY
+Concept	Your Implementation	Can You Explain?
+Service Discovery	@EnableDiscoveryClient, Eureka registration	✅
+API Gateway	Routes in application.yml, load balancing	✅
+Feign Clients	@FeignClient, declarative REST calls	✅
+Circuit Breaker	Resilience4j, fallback methods	✅
+Saga Pattern	OrderSagaOrchestrator with compensation	✅
+Kafka Producer	KafkaTemplate, event publishing	✅
+Distributed Transaction	Inventory reservation + rollback	✅
+🎯 SUMMARY: ONE LINE EACH
+What	Why	Your Code
+Eureka	Services find each other	@EnableDiscoveryClient
+Gateway	Single entry point	Routes in YAML
+Feign	Call services easily	@FeignClient
+Resilience4j	Handle failures gracefully	Fallback classes
+Saga	Multi-service transactions	Orchestrator + compensation
+Kafka	Async events	KafkaTemplate.send()
+🚀 YOUR JOURNEY SO FAR
+text
+Day 1: Discovery Server + Config Server
+Day 2: API Gateway + JWT Auth
+Day 3: Product + Inventory Services
+Day 4: Order Service + Saga + Kafka  ← YOU ARE HERE ✅
+
+Tomorrow (Day 5):
+- Payment Service (Kafka Consumer)
+- Complete Saga (real payment)
+- Notification Service
+
+Next Week:
+- Distributed Tracing (Zipkin)
+- Docker Compose for all services
+- Kubernetes deployment
+You've built production-ready microservices! The patterns you learned today (Saga, Kafka, Circuit Breaker) are exactly what companies like Uber, Netflix, and Walmart use.
+
+No remaining code for Kafka - your producer is complete! Tomorrow you'll add consumers.
+
+Celebrate your Day 4 completion! 🎉 Any questions before moving to Day 5?
+
+ok we need to go for the day 5 so yester day waht we have done and give today plane day 5 complete how we need to do like folder strucre and is there any new service need to add and how we do all teh give step by step first proper plan and git branch for that then we move to the coding and testing ok
+🎯 DAY 5: Payment Service & Complete Saga Pattern
+📋 Review of Day 4 (What We Completed Yesterday)
+✅ Day 4 Achievements:
+text
+┌─────────────────────────────────────────────────────────────┐
+│                    DAY 4 COMPLETED                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  1. Order Service (Port 8084)                               │
+│     ├── Order CRUD operations                               │
+│     ├── Saga Orchestrator                                   │
+│     └── Kafka Event Publisher                               │
+│                                                              │
+│  2. Kafka Infrastructure                                    │
+│     ├── Zookeeper (2181)                                    │
+│     ├── Kafka Broker (9092)                                 │
+│     ├── Kafka UI (8086)                                     │
+│     └── Topics: order-created-events                        │
+│                                                              │
+│  3. Integration                                             │
+│     ├── Feign Clients (Product, Inventory)                  │
+│     ├── Circuit Breakers (Resilience4j)                     │
+│     └── API Gateway Routes                                  │
+│                                                              │
+│  4. Testing                                                 │
+│     ├── Order creation (success/failure)                    │
+│     ├── Inventory reservation                               │
+│     ├── Kafka events verified                               │
+│     └── Eureka registration ✅                              │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+Current System Architecture:
+text
+┌─────────────────────────────────────────────────────────────────┐
+│                         SERVICES RUNNING                         │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  discovery-server  → 8761  (Eureka - Service Registry)         │
+│  api-gateway       → 8080  (Spring Cloud Gateway)               │
+│  auth-service      → 8081  (JWT Authentication)                 │
+│  product-service   → 8082  (Product Management)                 │
+│  inventory-service → 8083  (Stock Management)                   │
+│  order-service     → 8084  (Order + Saga + Kafka Producer) ✅   │
+│                                                                  │
+│  DOCKER CONTAINERS:                                              │
+│  zookeeper         → 2181  (Kafka coordination)                 │
+│  kafka             → 9092  (Message Broker)                     │
+│  kafka-ui          → 8086  (Kafka Monitoring)                   │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
