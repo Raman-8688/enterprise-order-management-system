@@ -5,4 +5,7 @@ import com.enterprise.oms.payment.model.Payment;
 
 public interface PaymentService {
     Payment processPayment(OrderCreatedEvent event);
+    Payment getPaymentByOrderId(String orderId);
+    Payment getPaymentById(String id);
+    Payment getPaymentByPaymentReference(String paymentReference);
 }

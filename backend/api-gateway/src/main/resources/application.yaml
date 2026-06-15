@@ -13,7 +13,7 @@ spring:
       default-filters:
         - name: AuthenticationFilter
       routes:
-        # Auth Service Routes (some public, some protected)
+        # Auth Service Routes
         - id: auth-service
           uri: lb://AUTH-SERVICE
           predicates:
@@ -21,7 +21,7 @@ spring:
           filters:
             - StripPrefix=0
 
-        # Product Service Routes (all protected except OPTIONS)
+        # Product Service Routes
         - id: product-service
           uri: lb://PRODUCT-SERVICE
           predicates:
@@ -29,7 +29,7 @@ spring:
           filters:
             - StripPrefix=0
 
-        # Inventory Service Routes (all protected)
+        # Inventory Service Routes
         - id: inventory-service
           uri: lb://INVENTORY-SERVICE
           predicates:
@@ -37,35 +37,23 @@ spring:
           filters:
             - StripPrefix=0
 
-        # Order Service Routes (with Circuit Breaker)
+        # Order Service Routes (NO Circuit Breaker - Working!)
         - id: order-service
           uri: lb://ORDER-SERVICE
           predicates:
             - Path=/api/orders/**
           filters:
             - StripPrefix=0
-            - name: CircuitBreaker
-              args:
-                name: orderService
-                fallbackUri: forward:/fallback/orders
-        #  Payment Service Routes
+
+        # Payment Service Routes (NO Circuit Breaker)
         - id: payment-service
           uri: lb://PAYMENT-SERVICE
           predicates:
             - Path=/api/payments/**
           filters:
             - StripPrefix=0
-            - name: CircuitBreaker
-              args:
-                name: paymentService
-                fallbackUri: forward:/fallback/payments
-        # Fallback routes
-        - id: fallback-route
-          uri: forward:/fallback
-          predicates:
-            - Path=/fallback/**
 
-# JWT Configuration (must match auth-service)
+# JWT Configuration
 jwt:
   secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
 

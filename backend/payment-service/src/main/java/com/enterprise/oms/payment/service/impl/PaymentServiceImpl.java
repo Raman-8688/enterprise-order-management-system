@@ -75,4 +75,25 @@ public class PaymentServiceImpl implements PaymentService {
         // 85% success rate for demo
         return random.nextInt(100) < 85;
     }
+
+    @Override
+    public Payment getPaymentByOrderId(String orderId) {
+        log.info("Fetching payment for orderId: {}", orderId);
+        return paymentRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new RuntimeException("Payment not found for order: " + orderId));
+    }
+
+    @Override
+    public Payment getPaymentById(String id) {
+        log.info("Fetching payment by id: {}", id);
+        return paymentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Payment not found with id: " + id));
+    }
+
+    @Override
+    public Payment getPaymentByPaymentReference(String paymentReference) {
+        log.info("Fetching payment by reference: {}", paymentReference);
+        return paymentRepository.findByPaymentReference(paymentReference)
+                .orElseThrow(() -> new RuntimeException("Payment not found with reference: " + paymentReference));
+    }
 }
