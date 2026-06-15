@@ -4,6 +4,7 @@ server:
 spring:
   application:
     name: order-service
+
   datasource:
     url: jdbc:postgresql://localhost:5432/orderdb
     username: postgres
@@ -15,6 +16,7 @@ spring:
       minimum-idle: 5
       idle-timeout: 600000
       pool-name: OrderServiceHikariPool
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -28,19 +30,29 @@ spring:
         order_updates: true
     show-sql: false
     open-in-view: false
+
   kafka:
     bootstrap-servers: localhost:9092
+
+    # Producer Configuration (Sending events to Kafka)
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
         spring.json.type.mapping: order:com.enterprise.oms.order.dto.event.OrderCreatedEvent
+      retries: 3
+      acks: all
+
+    # Consumer Configuration (Receiving events from Kafka)
     consumer:
       group-id: order-service-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "*"
+        spring.json.type.mapping: payment:com.enterprise.oms.order.dto.event.PaymentProcessedEvent
+      auto-offset-reset: earliest
+      enable-auto-commit: false
 
 eureka:
   client:
@@ -125,9 +137,13 @@ management:
       show-details: always
     circuitbreakers:
       enabled: true
+  metrics:
+    export:
+      simple:
+        enabled: true
 
 info:
   app:
     name: ${spring.application.name}
     version: 1.0.0
-    description: Order Management Service with Saga Pattern
+    description: Order Management Service with Saga Pattern and Kafka Events

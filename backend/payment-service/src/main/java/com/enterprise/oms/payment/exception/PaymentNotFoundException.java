@@ -1,2 +1,7 @@
-package com.enterprise.oms.payment.exception;public class PaymentNotFoundException {
+package com.enterprise.oms.payment.exception;
+
+public class PaymentNotFoundException extends RuntimeException {
+    public PaymentNotFoundException(String message) {
+        super(message);
+    }
 }
