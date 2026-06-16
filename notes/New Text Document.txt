@@ -200,6 +200,31 @@ Content-Type: application/json
         }
     ]
 }
+
+Responce:
+{
+    "id": "6d90d655-bc25-4830-a4fc-f4aee156d392",
+    "orderNumber": "ORD-1781528350211",
+    "customerEmail": "kafka-test@example.com",
+    "customerName": "Kafka Test User",
+    "shippingAddress": "789 Kafka Street, Event-Driven City",
+    "items": [
+        {
+            "productSku": "LAPTOP-002",
+            "productName": "Gaming Laptop",
+            "quantity": 1,
+            "unitPrice": 1599.99,
+            "subtotal": 1599.99
+        }
+    ],
+    "totalAmount": 1599.99,
+    "status": "CONFIRMED",
+    "paymentId": "PAY-1781528350563",
+    "failureReason": null,
+    "createdAt": "2026-06-15T18:29:10.594792",
+    "updatedAt": "2026-06-15T18:29:10.648398"
+}
+
 Test 6: Watch Messages Appear
 In Terminal 1 (order-created-events), you'll see:
 

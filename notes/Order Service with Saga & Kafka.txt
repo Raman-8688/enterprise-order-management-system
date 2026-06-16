@@ -1,3 +1,56 @@
+"accessToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJnYXRld2F5QHRlc3QuY29tIiwiaWF0IjoxNzgxNTgyMzY2LCJleHAiOjE3ODE2Njg3NjZ9.jaIMEKwbKEqZ2fNZOP8seUjQLLrE6u7GKTU9881LqcKEM8Y4O556S_EPtkb6YdRMp3dBx0tLvxrqvXuaaLxKHw",
+http://localhost:8080/api/orders
+{
+    "customerEmail": "final-test@example.com",
+    "customerName": "Final Test",
+    "shippingAddress": "123 Test Street",
+    "items": [
+        {
+            "productSku": "LAPTOP-002",
+            "quantity": 1
+        }
+    ]
+}
+{
+    "id": "9b737789-bf5b-44f3-bda5-672d1dc2d775",
+    "orderNumber": "ORD-1781582453281",
+    "customerEmail": "final-test@example.com",
+    "customerName": "Final Test",
+    "shippingAddress": "123 Test Street",
+    "items": [
+        {
+            "productSku": "LAPTOP-002",
+            "productName": "Gaming Laptop",
+            "quantity": 1,
+            "unitPrice": 1599.99,
+            "subtotal": 1599.99
+        }
+    ],
+    "totalAmount": 1599.99,
+    "status": "CONFIRMED",
+    "paymentId": "PAY-1781582460817",
+    "failureReason": null,
+    "createdAt": "2026-06-16T09:31:01.308081",
+    "updatedAt": "2026-06-16T09:31:01.510117"
+}
+
+http://localhost:8080/api/payments/order/9b737789-bf5b-44f3-bda5-672d1dc2d775
+# 3. Get Payment Details
+GET http://localhost:8080/api/payments/order/{orderId}
+Authorization: Bearer <your-token>
+{
+    "id": "912a8af8-3a78-40bb-9f8a-32439565cff9",
+    "paymentReference": "PAY-1781582464462",
+    "orderId": "9b737789-bf5b-44f3-bda5-672d1dc2d775",
+    "orderNumber": "ORD-1781582453281",
+    "customerEmail": "final-test@example.com",
+    "amount": 1599.99,
+    "status": "COMPLETED",
+    "transactionId": "TXN-1781582465678",
+    "failureReason": null,
+    "createdAt": "2026-06-16T09:31:04.593008"
+}
+
 # Navigate to docker directory
 cd D:\enterprise-order-management-system\docker
 
