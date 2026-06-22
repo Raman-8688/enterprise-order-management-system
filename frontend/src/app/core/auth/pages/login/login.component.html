@@ -1,0 +1,90 @@
+<div class="auth-shell">
+  <!-- Left Branding Panel -->
+  <div class="auth-left">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:auto">
+      <div class="sidebar-logo-icon">
+        <mat-icon style="color:#fff;font-size:20px;width:20px;height:20px">inventory</mat-icon>
+      </div>
+      <div>
+        <div style="color:#fff;font-size:16px;font-weight:600">Enterprise OMS</div>
+        <div style="color:var(--oms-sidebar-muted);font-size:11px">Order Management System</div>
+      </div>
+    </div>
+    <div style="margin-top:auto;padding-top:60px">
+      <h2 style="color:#e2e8f0;font-size:26px;font-weight:600;line-height:1.3;margin-bottom:12px">
+        Manage your entire order lifecycle in one place
+      </h2>
+      <p style="color:#64748b;font-size:14px;line-height:1.7;margin-bottom:36px">
+        From product catalogues and inventory tracking to order fulfillment and payment processing.
+      </p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        @for (stat of [{n:'12k+',l:'Orders/day'},{n:'99.9%',l:'Uptime SLA'},{n:'8',l:'Microservices'},{n:'3',l:'Role levels'}]; track stat.n) {
+          <div>
+            <div style="color:var(--oms-blue);font-size:28px;font-weight:700">{{ stat.n }}</div>
+            <div style="color:#64748b;font-size:12px;margin-top:2px">{{ stat.l }}</div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Form Panel -->
+  <div class="auth-right">
+    <div style="max-width:400px;width:100%;margin:0 auto">
+      <div style="margin-bottom:36px">
+        <h2 style="font-size:26px;font-weight:700;color:var(--oms-text)">Welcome back</h2>
+        <p style="font-size:14px;color:var(--oms-text-secondary);margin-top:6px">Sign in to your OMS account to continue</p>
+      </div>
+
+      @if (error) {
+        <div class="oms-alert error" style="margin-bottom:20px">
+          <mat-icon style="font-size:18px;width:18px;height:18px">error_outline</mat-icon>
+          {{ error }}
+        </div>
+      }
+
+      <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+        <mat-form-field appearance="outline" class="w-100" style="margin-bottom:8px">
+          <mat-label>Email address</mat-label>
+          <input matInput type="email" [(ngModel)]="email" name="email" placeholder="you@company.com" autocomplete="email" required />
+          <mat-icon matSuffix>email</mat-icon>
+        </mat-form-field>
+
+        <div style="position:relative;margin-bottom:16px">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Password</mat-label>
+            <input matInput [type]="showPass ? 'text' : 'password'"
+                   [(ngModel)]="password" name="password" autocomplete="current-password" required />
+            <button mat-icon-button matSuffix type="button" (click)="showPass=!showPass">
+              <mat-icon>{{ showPass ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+          </mat-form-field>
+          <a href="#" style="position:absolute;right:0;top:-24px;font-size:12px;color:var(--oms-blue)">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="btn-oms-primary w-100"
+                style="height:44px;font-size:14px;justify-content:center" [disabled]="loading">
+          @if (loading) {
+            <mat-spinner diameter="18"></mat-spinner> Signing in…
+          } @else {
+            <mat-icon style="font-size:18px;width:18px;height:18px">login</mat-icon>
+            Sign in to dashboard
+          }
+        </button>
+      </form>
+
+      <p style="font-size:13px;color:var(--oms-text-secondary);text-align:center;margin-top:24px">
+        Don't have an account?
+        <a routerLink="/auth/register" style="color:var(--oms-blue);font-weight:500">Register here</a>
+      </p>
+
+      <div style="margin-top:28px;padding:14px;background:#f8fafc;border-radius:8px;border:1px solid var(--oms-border)">
+        <p style="font-size:11px;font-weight:600;color:var(--oms-text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Dev credentials</p>
+        <p style="font-size:12px;color:var(--oms-text-secondary)">
+          <strong>Email:</strong> gateway&#64;test.com<br>
+          <strong>Password:</strong> password123
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,15 @@
+<header class="oms-topbar">
+  <div class="topbar-title">
+    <h2>{{ title }}</h2>
+    @if (subtitle) { <p>{{ subtitle }}</p> }
+  </div>
+  <div class="topbar-actions">
+    <button mat-icon-button class="topbar-icon-btn" matTooltip="Notifications">
+      <mat-icon>notifications_outlined</mat-icon>
+    </button>
+    <button mat-icon-button class="topbar-icon-btn" matTooltip="Search">
+      <mat-icon>search</mat-icon>
+    </button>
+    <div class="topbar-avatar" matTooltip="Profile">{{ initials }}</div>
+  </div>
+</header>

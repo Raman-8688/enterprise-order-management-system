@@ -1,0 +1,196 @@
+<app-topbar title="Payments" subtitle="Payment records & transaction lookup"></app-topbar>
+
+<div class="page-body">
+  <app-page-header title="Payments" subtitle="View payments processed via the Order Saga">
+    <button class="btn-oms-secondary" (click)="load()">
+      <mat-icon>refresh</mat-icon> Refresh
+    </button>
+  </app-page-header>
+
+  <!-- KPI Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="stat-card-label">
+          <div class="stat-card-icon" style="background:#dbeafe">
+            <mat-icon style="color:#1d4ed8;font-size:18px;width:18px;height:18px">receipt_long</mat-icon>
+          </div>
+          Total
+        </div>
+        <div class="stat-card-value">{{ stats.total }}</div>
+        <div class="stat-card-change neutral"><mat-icon style="font-size:14px;width:14px;height:14px">info</mat-icon> Records</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="stat-card-label">
+          <div class="stat-card-icon" style="background:#dcfce7">
+            <mat-icon style="color:#16a34a;font-size:18px;width:18px;height:18px">check_circle</mat-icon>
+          </div>
+          Completed
+        </div>
+        <div class="stat-card-value">{{ stats.completed }}</div>
+        <div class="stat-card-change positive"><mat-icon style="font-size:14px;width:14px;height:14px">trending_up</mat-icon> Successful</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="stat-card-label">
+          <div class="stat-card-icon" style="background:#fee2e2">
+            <mat-icon style="color:#dc2626;font-size:18px;width:18px;height:18px">error</mat-icon>
+          </div>
+          Failed
+        </div>
+        <div class="stat-card-value">{{ stats.failed }}</div>
+        <div class="stat-card-change" [class.negative]="stats.failed > 0" [class.positive]="stats.failed === 0">
+          <mat-icon style="font-size:14px;width:14px;height:14px">{{ stats.failed > 0 ? 'warning' : 'check' }}</mat-icon>
+          {{ stats.failed > 0 ? 'Needs review' : 'All good' }}
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="stat-card-label">
+          <div class="stat-card-icon" style="background:#f5f3ff">
+            <mat-icon style="color:#7c3aed;font-size:18px;width:18px;height:18px">currency_rupee</mat-icon>
+          </div>
+          Revenue
+        </div>
+        <div class="stat-card-value">{{ stats.totalAmount | currency:'INR':'symbol':'1.0-0' }}</div>
+        <div class="stat-card-change positive"><mat-icon style="font-size:14px;width:14px;height:14px">trending_up</mat-icon> Collected</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search by Order ID -->
+  <div class="oms-card mb-4">
+    <div class="oms-card-header">
+      <div>
+        <div class="oms-card-title">Lookup Payment by Order</div>
+        <div class="oms-card-subtitle">Enter an Order ID (UUID) to find its payment</div>
+      </div>
+    </div>
+    <div class="oms-card-body">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <mat-form-field appearance="outline" style="flex:1;min-width:260px;margin:0">
+          <mat-label>Order ID</mat-label>
+          <input matInput [(ngModel)]="searchOrderId"
+                 placeholder="e.g. 9c005cfa-eab3-4e4e-96b1-ff57b23f1cad"
+                 (keyup.enter)="searchByOrder()" />
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+        <button mat-raised-button color="primary" (click)="searchByOrder()" [disabled]="searching" style="height:56px">
+          @if (searching) { <mat-spinner diameter="18"></mat-spinner> }
+          @else { <mat-icon>search</mat-icon> Search }
+        </button>
+        @if (searchedPayment || searchError) {
+          <button mat-stroked-button (click)="clearSearch()" style="height:56px">
+            <mat-icon>clear</mat-icon> Clear
+          </button>
+        }
+      </div>
+
+      <!-- Search result -->
+      @if (searchError) {
+        <div class="oms-alert error" style="margin-top:16px">
+          <mat-icon>error_outline</mat-icon> {{ searchError }}
+        </div>
+      }
+      @if (searchedPayment) {
+        <div style="margin-top:16px;padding:16px;background:#f8fafc;border-radius:8px;border:1px solid var(--oms-border)">
+          <div class="row g-3">
+            @for (f of [
+              {label:'Payment ID',   val: searchedPayment.paymentId},
+              {label:'Order ID',     val: searchedPayment.orderId},
+              {label:'Amount',       val: (searchedPayment.amount | currency:'INR':'symbol':'1.2-2')},
+              {label:'Status',       val: searchedPayment.status},
+              {label:'Method',       val: searchedPayment.method ?? '—'},
+              {label:'Transaction',  val: searchedPayment.transactionId ?? '—'}
+            ]; track f.label) {
+              <div class="col-6 col-md-4">
+                <div style="font-size:11px;color:var(--oms-text-secondary);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px">{{ f.label }}</div>
+                <div style="font-size:13px;font-weight:500;font-family:monospace;word-break:break-all">{{ f.val }}</div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Payments Table -->
+  <div class="oms-card">
+    <div class="oms-card-header">
+      <div class="oms-card-title">Payment Records</div>
+      <mat-chip-set>
+        <mat-chip style="font-size:11px">Auto-generated by Saga</mat-chip>
+      </mat-chip-set>
+    </div>
+
+    @if (loading) {
+      <app-loading-spinner></app-loading-spinner>
+    } @else if (payments.length === 0) {
+      <app-empty-state
+        icon="credit_card_off"
+        title="No payment records"
+        message="Payments are created automatically when orders are placed. Try placing an order first.">
+        <a routerLink="/orders/create" class="btn-oms-primary" style="margin-top:16px">
+          <mat-icon>add</mat-icon> Create Order
+        </a>
+      </app-empty-state>
+    } @else {
+      <div style="overflow-x:auto">
+        <mat-table [dataSource]="payments" class="w-100">
+
+          <ng-container matColumnDef="paymentId">
+            <mat-header-cell *matHeaderCellDef>Payment ID</mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              <span style="font-family:monospace;font-size:11px;color:var(--oms-blue)">{{ row.paymentId }}</span>
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="orderId">
+            <mat-header-cell *matHeaderCellDef>Order ID</mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              <a [routerLink]="['/orders', row.orderId]"
+                 style="font-size:12px;font-family:monospace;color:var(--oms-blue)">
+                {{ row.orderId | slice:0:8 }}…
+              </a>
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="amount">
+            <mat-header-cell *matHeaderCellDef>Amount</mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              <strong>{{ row.amount | currency:'INR':'symbol':'1.2-2' }}</strong>
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+            <mat-cell *matCellDef="let row">
+              <app-badge [label]="row.status" [type]="getBadgeType(row.status)"></app-badge>
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="method">
+            <mat-header-cell *matHeaderCellDef>Method</mat-header-cell>
+            <mat-cell *matCellDef="let row" style="color:var(--oms-text-secondary)">
+              {{ row.method ?? '—' }}
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="createdAt">
+            <mat-header-cell *matHeaderCellDef>Date</mat-header-cell>
+            <mat-cell *matCellDef="let row" style="font-size:12px;color:var(--oms-text-secondary)">
+              {{ row.createdAt | date:'dd MMM yyyy, HH:mm' }}
+            </mat-cell>
+          </ng-container>
+
+          <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+        </mat-table>
+      </div>
+    }
+  </div>
+</div>

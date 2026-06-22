@@ -1,0 +1,250 @@
+<app-topbar title="Settings" subtitle="Account preferences and system configuration"></app-topbar>
+
+<div class="page-body">
+  <app-page-header title="Settings" subtitle="Manage your account and application preferences"></app-page-header>
+
+  <div class="row g-4">
+    <!-- User Card -->
+    <div class="col-12 col-lg-3">
+      <div class="oms-card">
+        <div class="oms-card-body" style="text-align:center;padding:28px 20px">
+          <div style="width:68px;height:68px;border-radius:50%;background:var(--oms-navy);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:24px;font-weight:700;color:#93c5fd">
+            {{ initials }}
+          </div>
+          <div style="font-size:15px;font-weight:600">{{ profile.firstName || profile.email }}</div>
+          <div style="font-size:12px;color:var(--oms-text-secondary);margin-top:3px">{{ profile.email }}</div>
+          <div class="oms-badge badge-navy" style="margin-top:10px;display:inline-flex;align-items:center;gap:4px">
+            <mat-icon style="font-size:13px;width:13px;height:13px">shield</mat-icon>
+            {{ user?.role ?? 'USER' }}
+          </div>
+        </div>
+        <mat-divider></mat-divider>
+        <div style="padding:8px 0">
+          <button mat-button class="w-100" style="color:var(--oms-danger);justify-content:flex-start;padding:10px 16px" (click)="logout()">
+            <mat-icon style="margin-right:8px">logout</mat-icon>Sign out
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="col-12 col-lg-9">
+      <mat-tab-group animationDuration="200ms" color="primary">
+
+        <!-- PROFILE TAB -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon style="margin-right:6px;font-size:18px;width:18px;height:18px">person</mat-icon>Profile
+          </ng-template>
+          <div style="padding:20px 0">
+            <div class="oms-card">
+              <div class="oms-card-header"><div class="oms-card-title">Personal Information</div></div>
+              <div class="oms-card-body">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <mat-form-field appearance="outline" class="w-100">
+                      <mat-label>First Name</mat-label>
+                      <input matInput [(ngModel)]="profile.firstName" placeholder="John" />
+                      <mat-icon matSuffix>person</mat-icon>
+                    </mat-form-field>
+                  </div>
+                  <div class="col-md-6">
+                    <mat-form-field appearance="outline" class="w-100">
+                      <mat-label>Last Name</mat-label>
+                      <input matInput [(ngModel)]="profile.lastName" placeholder="Doe" />
+                    </mat-form-field>
+                  </div>
+                  <div class="col-md-6">
+                    <mat-form-field appearance="outline" class="w-100">
+                      <mat-label>Email Address</mat-label>
+                      <input matInput [(ngModel)]="profile.email" type="email" [readonly]="true" />
+                      <mat-icon matSuffix>email</mat-icon>
+                      <mat-hint>Email cannot be changed here</mat-hint>
+                    </mat-form-field>
+                  </div>
+                  <div class="col-md-6">
+                    <mat-form-field appearance="outline" class="w-100">
+                      <mat-label>Phone Number</mat-label>
+                      <input matInput [(ngModel)]="profile.phone" placeholder="+91 98765 43210" />
+                      <mat-icon matSuffix>phone</mat-icon>
+                    </mat-form-field>
+                  </div>
+                  <div class="col-md-6">
+                    <mat-form-field appearance="outline" class="w-100">
+                      <mat-label>Department</mat-label>
+                      <input matInput [(ngModel)]="profile.department" placeholder="Operations" />
+                    </mat-form-field>
+                  </div>
+                  <div class="col-md-6">
+                    <mat-form-field appearance="outline" class="w-100">
+                      <mat-label>Time Zone</mat-label>
+                      <mat-select [(ngModel)]="profile.timezone">
+                        @for (tz of timezones; track tz) {
+                          <mat-option [value]="tz">{{ tz }}</mat-option>
+                        }
+                      </mat-select>
+                      <mat-icon matSuffix>schedule</mat-icon>
+                    </mat-form-field>
+                  </div>
+                </div>
+                <mat-divider style="margin:8px 0 20px"></mat-divider>
+                <div style="display:flex;justify-content:flex-end;gap:10px">
+                  <button mat-stroked-button>Cancel</button>
+                  <button mat-raised-button color="primary" (click)="saveProfile()" [disabled]="saving">
+                    <mat-icon>{{ saving ? 'hourglass_empty' : 'save' }}</mat-icon>
+                    {{ saving ? 'Saving…' : 'Save changes' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- NOTIFICATIONS TAB -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon style="margin-right:6px;font-size:18px;width:18px;height:18px">notifications</mat-icon>Notifications
+          </ng-template>
+          <div style="padding:20px 0">
+            <div class="oms-card">
+              <div class="oms-card-header"><div class="oms-card-title">Notification Preferences</div></div>
+              <div class="oms-card-body">
+                @for (pref of notifPrefs; track pref.key) {
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--oms-border)">
+                    <div style="display:flex;align-items:center;gap:12px">
+                      <div style="width:38px;height:38px;border-radius:8px;background:var(--oms-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                        <mat-icon style="font-size:18px;width:18px;height:18px;color:var(--oms-text-secondary)">{{ pref.icon }}</mat-icon>
+                      </div>
+                      <div>
+                        <div style="font-size:13px;font-weight:500">{{ pref.label }}</div>
+                        <div style="font-size:12px;color:var(--oms-text-secondary);margin-top:2px">{{ pref.desc }}</div>
+                      </div>
+                    </div>
+                    <mat-slide-toggle
+                      color="primary"
+                      [checked]="getToggleValue(pref.key)"
+                      (change)="setToggleValue(pref.key, $event.checked)">
+                    </mat-slide-toggle>
+                  </div>
+                }
+                <div style="display:flex;justify-content:flex-end;margin-top:20px">
+                  <button mat-raised-button color="primary" (click)="saveNotifications()">
+                    <mat-icon>save</mat-icon>Save preferences
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- API INFO TAB -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon style="margin-right:6px;font-size:18px;width:18px;height:18px">api</mat-icon>API Info
+          </ng-template>
+          <div style="padding:20px 0">
+            <div class="oms-card mb-3">
+              <div class="oms-card-header">
+                <div>
+                  <div class="oms-card-title">Backend API Endpoints</div>
+                  <div class="oms-card-subtitle">All requests route through API Gateway on port 8080</div>
+                </div>
+                <span class="oms-badge badge-success">Running</span>
+              </div>
+              <div class="oms-card-body">
+                @for (ep of endpoints; track ep.label) {
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;margin-bottom:8px;background:var(--oms-bg);border-radius:8px;border:1px solid var(--oms-border)">
+                    <div>
+                      <div style="font-size:13px;font-weight:600;margin-bottom:4px">{{ ep.label }}</div>
+                      <code style="font-size:11px;color:var(--oms-blue);background:#eff6ff;padding:2px 8px;border-radius:4px">{{ ep.url }}</code>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px">
+                      <span class="oms-badge badge-info" style="font-size:10px">{{ ep.method }}</span>
+                      <button mat-icon-button [matTooltip]="'Copy URL'" (click)="copyUrl(ep.url)">
+                        <mat-icon style="font-size:18px;width:18px;height:18px">content_copy</mat-icon>
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="oms-card">
+              <div class="oms-card-header"><div class="oms-card-title">Kafka Topics</div></div>
+              <div class="oms-card-body">
+                @for (topic of kafkaTopics; track topic.name) {
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;margin-bottom:8px;background:var(--oms-bg);border-radius:8px;border:1px solid var(--oms-border)">
+                    <div style="display:flex;align-items:center;gap:12px">
+                      <mat-icon style="color:#d97706;font-size:22px;width:22px;height:22px">bolt</mat-icon>
+                      <div>
+                        <code style="font-size:12px;font-weight:600;color:var(--oms-text)">{{ topic.name }}</code>
+                        <div style="font-size:11px;color:var(--oms-text-secondary);margin-top:2px">{{ topic.desc }}</div>
+                      </div>
+                    </div>
+                    <span class="oms-badge badge-warning">{{ topic.partitions }} partitions</span>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- SECURITY TAB -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon style="margin-right:6px;font-size:18px;width:18px;height:18px">lock</mat-icon>Security
+          </ng-template>
+          <div style="padding:20px 0">
+            <div class="oms-card mb-3">
+              <div class="oms-card-header"><div class="oms-card-title">Session Information</div></div>
+              <div class="oms-card-body">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--oms-border)">
+                  <span style="font-size:13px;color:var(--oms-text-secondary)">Email</span>
+                  <span style="font-size:13px;font-weight:500">{{ user?.email ?? '—' }}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--oms-border)">
+                  <span style="font-size:13px;color:var(--oms-text-secondary)">Role</span>
+                  <span style="font-size:13px;font-weight:500">{{ user?.role ?? 'USER' }}</span>
+                </div>
+                @for (f of sessionInfo; track f.label) {
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--oms-border)">
+                    <span style="font-size:13px;color:var(--oms-text-secondary)">{{ f.label }}</span>
+                    <span style="font-size:13px;font-weight:500">{{ f.value }}</span>
+                  </div>
+                }
+                <div style="margin-top:20px">
+                  <button mat-stroked-button color="warn" (click)="logout()">
+                    <mat-icon>logout</mat-icon>Sign out of all sessions
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Microservices Grid -->
+            <div class="oms-card">
+              <div class="oms-card-header"><div class="oms-card-title">System Architecture</div></div>
+              <div class="oms-card-body">
+                <div class="row g-2">
+                  @for (svc of services; track svc.name) {
+                    <div class="col-12 col-md-6">
+                      <div style="padding:12px;border:1px solid var(--oms-border);border-radius:8px;border-left:3px solid"
+                           [style.border-left-color]="svc.color">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                          <mat-icon [style.color]="svc.color" style="font-size:16px;width:16px;height:16px">{{ svc.icon }}</mat-icon>
+                          <span style="font-size:13px;font-weight:600">{{ svc.name }}</span>
+                        </div>
+                        <div style="font-size:11px;color:var(--oms-text-secondary);margin-bottom:4px">{{ svc.desc }}</div>
+                        <code style="font-size:11px;color:var(--oms-text-muted)">:{{ svc.port }}</code>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+      </mat-tab-group>
+    </div>
+  </div>
+</div>

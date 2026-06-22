@@ -1,0 +1,82 @@
+<div class="auth-shell">
+  <div class="auth-left">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="sidebar-logo-icon">
+        <mat-icon style="color:#fff;font-size:20px;width:20px;height:20px">inventory</mat-icon>
+      </div>
+      <div>
+        <div style="color:#fff;font-size:16px;font-weight:600">Enterprise OMS</div>
+        <div style="color:var(--oms-sidebar-muted);font-size:11px">Order Management System</div>
+      </div>
+    </div>
+    <div style="margin-top:auto">
+      <h2 style="color:#e2e8f0;font-size:24px;font-weight:600;margin-bottom:12px">Join Enterprise OMS</h2>
+      <p style="color:#64748b;font-size:14px;line-height:1.7">
+        Create your account to start managing products, orders, inventory and payments from a single unified dashboard.
+      </p>
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div style="max-width:400px;width:100%;margin:0 auto">
+      <div style="margin-bottom:32px">
+        <h2 style="font-size:26px;font-weight:700;color:var(--oms-text)">Create account</h2>
+        <p style="font-size:14px;color:var(--oms-text-secondary);margin-top:6px">Fill in your details to get started</p>
+      </div>
+
+      @if (error) {
+        <div class="oms-alert error" style="margin-bottom:20px">
+          <mat-icon style="font-size:18px;width:18px;height:18px">error_outline</mat-icon>
+          {{ error }}
+        </div>
+      }
+
+      <form (ngSubmit)="onSubmit()">
+        <div class="row g-2" style="margin-bottom:0">
+          <div class="col-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>First name</mat-label>
+              <input matInput [(ngModel)]="firstName" name="firstName" placeholder="John" required />
+            </mat-form-field>
+          </div>
+          <div class="col-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Last name</mat-label>
+              <input matInput [(ngModel)]="lastName" name="lastName" placeholder="Doe" required />
+            </mat-form-field>
+          </div>
+        </div>
+
+        <mat-form-field appearance="outline" class="w-100" style="margin-bottom:8px">
+          <mat-label>Email address</mat-label>
+          <input matInput type="email" [(ngModel)]="email" name="email" placeholder="you@company.com" required />
+          <mat-icon matSuffix>email</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-100" style="margin-bottom:16px">
+          <mat-label>Password</mat-label>
+          <input matInput [type]="showPass ? 'text' : 'password'"
+                 [(ngModel)]="password" name="password" placeholder="Minimum 6 characters" required />
+          <button mat-icon-button matSuffix type="button" (click)="showPass=!showPass">
+            <mat-icon>{{ showPass ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <button type="submit" class="btn-oms-primary w-100"
+                style="height:44px;font-size:14px;justify-content:center" [disabled]="loading">
+          @if (loading) {
+            <mat-spinner diameter="18"></mat-spinner> Creating account…
+          } @else {
+            <mat-icon style="font-size:18px;width:18px;height:18px">person_add</mat-icon>
+            Create account
+          }
+        </button>
+      </form>
+
+      <p style="font-size:13px;color:var(--oms-text-secondary);text-align:center;margin-top:24px">
+        Already have an account?
+        <a routerLink="/auth/login" style="color:var(--oms-blue);font-weight:500">Sign in</a>
+      </p>
+    </div>
+  </div>
+</div>

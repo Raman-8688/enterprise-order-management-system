@@ -1,0 +1,134 @@
+<app-topbar title="Order Detail"></app-topbar>
+
+<div class="page-body">
+  @if (loading) {
+    <app-loading-spinner></app-loading-spinner>
+  } @else if (order) {
+    <app-page-header [title]="order.orderNumber" subtitle="Full order details and timeline">
+      <a routerLink="/orders" class="btn-oms-secondary">
+        <mat-icon style="font-size:16px;width:16px;height:16px">arrow_back</mat-icon>Back
+      </a>
+      @if (canCancel) {
+        <button class="btn-oms-danger" (click)="showCancel=true">
+          <mat-icon style="font-size:16px;width:16px;height:16px">cancel</mat-icon>Cancel order
+        </button>
+      }
+    </app-page-header>
+
+    <div class="row g-3">
+      <div class="col-12 col-lg-8">
+        <!-- Status / Timeline -->
+        <div class="oms-card mb-3">
+          <div class="oms-card-header">
+            <div>
+              <div class="oms-card-title">{{ order.orderNumber }}</div>
+              <div class="oms-card-subtitle">Updated {{ order.updatedAt | date:'dd MMM yyyy, HH:mm' }}</div>
+            </div>
+            <app-badge [label]="order.status" [type]="getBadgeType(order.status)"></app-badge>
+          </div>
+          <div class="oms-card-body">
+            @if (!['FAILED','CANCELLED'].includes(order.status)) {
+              <div style="display:flex;align-items:center;margin-bottom:8px;overflow-x:auto;padding-bottom:8px">
+                @for (step of timelineSteps; track step.label; let last = $last) {
+                  <div style="display:flex;flex-direction:column;align-items:center;gap:6px;min-width:80px">
+                    <div style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid"
+                         [style.border-color]="step.done ? 'var(--oms-success)' : 'var(--oms-border)'"
+                         [style.background]="step.active ? 'var(--oms-success)' : step.done ? 'var(--oms-success-bg)' : 'var(--oms-bg)'">
+                      <mat-icon style="font-size:16px;width:16px;height:16px"
+                                [style.color]="step.active ? '#fff' : step.done ? 'var(--oms-success)' : 'var(--oms-border)'">
+                        check
+                      </mat-icon>
+                    </div>
+                    <div style="font-size:10px;text-align:center;font-weight:500;text-transform:uppercase;letter-spacing:0.3px"
+                         [style.color]="step.done ? 'var(--oms-text)' : 'var(--oms-text-muted)'">
+                      {{ step.label }}
+                    </div>
+                  </div>
+                  @if (!last) {
+                    <div style="flex:1;height:2px;margin-bottom:22px"
+                         [style.background]="step.done ? 'var(--oms-success-bg)' : 'var(--oms-border)'">
+                    </div>
+                  }
+                }
+              </div>
+            }
+            @if (order.failureReason) {
+              <div class="oms-alert error">
+                <mat-icon style="font-size:18px;width:18px;height:18px">error</mat-icon>
+                {{ order.failureReason }}
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Items -->
+        <div class="oms-card">
+          <div class="oms-card-header"><div class="oms-card-title">Items ordered</div></div>
+          <div style="overflow-x:auto">
+            <table class="oms-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th style="text-align:center">Qty</th>
+                  <th style="text-align:right">Unit price</th>
+                  <th style="text-align:right">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of order.items; track item.productSku) {
+                  <tr>
+                    <td>
+                      <div style="font-weight:500">{{ item.productName ?? item.productSku }}</div>
+                      <div style="font-size:11px;color:var(--oms-text-muted);font-family:monospace">{{ item.productSku }}</div>
+                    </td>
+                    <td style="text-align:center;font-weight:500">{{ item.quantity }}</td>
+                    <td style="text-align:right">{{ item.unitPrice | currency:'INR':'symbol':'1.2-2' }}</td>
+                    <td style="text-align:right;font-weight:600">{{ item.subtotal | currency:'INR':'symbol':'1.2-2' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <div style="padding:14px 20px;display:flex;justify-content:flex-end;align-items:center;gap:16px;background:#f8fafc;border-top:1px solid var(--oms-border)">
+            <span style="font-size:14px;font-weight:600;color:var(--oms-text-secondary)">Total</span>
+            <span style="font-size:22px;font-weight:700;color:var(--oms-blue)">{{ order.totalAmount | currency:'INR':'symbol':'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Customer Info -->
+      <div class="col-12 col-lg-4">
+        <div class="oms-card">
+          <div class="oms-card-header"><div class="oms-card-title">Customer & Payment</div></div>
+          <div class="oms-card-body">
+            @for (field of [
+              {icon:'person',        label:'Name',         value:order.customerName},
+              {icon:'email',         label:'Email',        value:order.customerEmail},
+              {icon:'location_on',   label:'Address',      value:order.shippingAddress},
+              {icon:'payment',       label:'Payment ID',   value:order.paymentId ?? '—'},
+              {icon:'calendar_today',label:'Placed',       value:(order.createdAt | date:'dd MMM yyyy, HH:mm') ?? '—'},
+              {icon:'update',        label:'Last updated', value:(order.updatedAt | date:'dd MMM yyyy, HH:mm') ?? '—'}
+            ]; track field.label) {
+              <div style="display:flex;gap:12px;margin-bottom:14px;align-items:flex-start">
+                <mat-icon style="font-size:18px;width:18px;height:18px;color:var(--oms-text-muted);flex-shrink:0;margin-top:1px">{{ field.icon }}</mat-icon>
+                <div style="min-width:0">
+                  <div style="font-size:11px;font-weight:600;color:var(--oms-text-secondary);text-transform:uppercase;letter-spacing:0.3px">{{ field.label }}</div>
+                  <div style="font-size:13px;font-weight:500;word-break:break-all">{{ field.value }}</div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+
+<app-confirm-dialog
+  [visible]="showCancel"
+  title="Cancel Order"
+  [message]="'Cancel ' + (order?.orderNumber ?? '') + '? Inventory will be released.'"
+  confirmLabel="Cancel Order"
+  (confirmed)="doCancel()"
+  (cancelled)="showCancel=false">
+</app-confirm-dialog>

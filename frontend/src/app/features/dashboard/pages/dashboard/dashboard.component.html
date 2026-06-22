@@ -1,0 +1,184 @@
+<app-topbar title="Dashboard" [subtitle]="today"></app-topbar>
+
+<div class="page-body">
+  @if (loading) {
+    <app-loading-spinner></app-loading-spinner>
+  } @else {
+
+    <!-- KPI Row -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-xl-3">
+        <div class="stat-card">
+          <div class="stat-card-label">
+            <div class="stat-card-icon" style="background:#dbeafe">
+              <mat-icon style="color:#1d4ed8;font-size:18px;width:18px;height:18px">shopping_cart</mat-icon>
+            </div>
+            Total Orders
+          </div>
+          <div class="stat-card-value">{{ stats.totalOrders | number }}</div>
+          <div class="stat-card-change positive">
+            <mat-icon style="font-size:14px;width:14px;height:14px">trending_up</mat-icon>
+            {{ stats.confirmedOrders }} confirmed
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-xl-3">
+        <div class="stat-card">
+          <div class="stat-card-label">
+            <div class="stat-card-icon" style="background:#dcfce7">
+              <mat-icon style="color:#16a34a;font-size:18px;width:18px;height:18px">check_circle</mat-icon>
+            </div>
+            Confirmed
+          </div>
+          <div class="stat-card-value">{{ stats.confirmedOrders | number }}</div>
+          <div class="stat-card-change positive">
+            <mat-icon style="font-size:14px;width:14px;height:14px">trending_up</mat-icon>
+            Successfully processed
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-xl-3">
+        <div class="stat-card">
+          <div class="stat-card-label">
+            <div class="stat-card-icon" style="background:#f5f3ff">
+              <mat-icon style="color:#7c3aed;font-size:18px;width:18px;height:18px">inventory_2</mat-icon>
+            </div>
+            Products
+          </div>
+          <div class="stat-card-value">{{ stats.totalProducts | number }}</div>
+          <div class="stat-card-change neutral">
+            <mat-icon style="font-size:14px;width:14px;height:14px">info</mat-icon>
+            In catalogue
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-xl-3">
+        <div class="stat-card">
+          <div class="stat-card-label">
+            <div class="stat-card-icon" style="background:#fee2e2">
+              <mat-icon style="color:#dc2626;font-size:18px;width:18px;height:18px">warning</mat-icon>
+            </div>
+            Low Stock
+          </div>
+          <div class="stat-card-value">{{ stats.lowStockItems }}</div>
+          <div class="stat-card-change"
+               [class.negative]="stats.lowStockItems > 0"
+               [class.positive]="stats.lowStockItems === 0">
+            <mat-icon style="font-size:14px;width:14px;height:14px">{{ stats.lowStockItems > 0 ? 'trending_down' : 'check' }}</mat-icon>
+            {{ stats.lowStockItems > 0 ? 'Needs attention' : 'All good' }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-3 mb-4">
+      <div class="col-12 col-xl-8">
+        <div class="oms-card">
+          <div class="oms-card-header">
+            <div>
+              <div class="oms-card-title">Order Volume — 2026</div>
+              <div class="oms-card-subtitle">Monthly breakdown Jan–Jul</div>
+            </div>
+            <mat-chip-set>
+              <mat-chip color="primary" highlighted style="font-size:11px">
+                <mat-icon matChipAvatar>bolt</mat-icon>Live
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+          <div class="oms-card-body">
+            <div style="display:flex;align-items:flex-end;gap:10px;height:180px;padding-top:10px">
+              @for (bar of barData; track bar.month) {
+                <div style="display:flex;flex-direction:column;align-items:center;flex:1;gap:6px;height:100%">
+                  <div style="flex:1;display:flex;align-items:flex-end;width:100%">
+                    <div style="width:100%;border-radius:4px 4px 0 0;background:var(--oms-blue);opacity:0.85;transition:height 0.5s;min-height:4px"
+                         [style.height.%]="bar.pct"></div>
+                  </div>
+                  <div style="font-size:11px;color:var(--oms-text-muted);white-space:nowrap">{{ bar.month }}</div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-xl-4">
+        <div class="oms-card h-100">
+          <div class="oms-card-header"><div class="oms-card-title">Orders by Status</div></div>
+          <div class="oms-card-body">
+            <div style="display:flex;justify-content:center;margin-bottom:16px">
+              <svg width="120" height="120" viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="46" fill="none" stroke="#16a34a" stroke-width="20"
+                        [attr.stroke-dasharray]="statusDistribution[0].pct + ' 100'"
+                        stroke-dashoffset="0" transform="rotate(-90 60 60)" stroke-linecap="round"/>
+                <circle cx="60" cy="60" r="46" fill="none" stroke="#3b82f6" stroke-width="20"
+                        [attr.stroke-dasharray]="statusDistribution[1].pct + ' 100'"
+                        [attr.stroke-dashoffset]="-(statusDistribution[0].pct)" transform="rotate(-90 60 60)" stroke-linecap="round"/>
+                <circle cx="60" cy="60" r="46" fill="none" stroke="#f59e0b" stroke-width="20"
+                        [attr.stroke-dasharray]="statusDistribution[2].pct + ' 100'"
+                        [attr.stroke-dashoffset]="-(statusDistribution[0].pct + statusDistribution[1].pct)" transform="rotate(-90 60 60)" stroke-linecap="round"/>
+                <circle cx="60" cy="60" r="46" fill="none" stroke="#ef4444" stroke-width="20"
+                        [attr.stroke-dasharray]="statusDistribution[3].pct + ' 100'"
+                        [attr.stroke-dashoffset]="-(statusDistribution[0].pct + statusDistribution[1].pct + statusDistribution[2].pct)" transform="rotate(-90 60 60)" stroke-linecap="round"/>
+                <text x="60" y="55" text-anchor="middle" font-size="16" font-weight="700" fill="var(--oms-text)">{{ stats.totalOrders }}</text>
+                <text x="60" y="70" text-anchor="middle" font-size="10" fill="var(--oms-text-muted)">orders</text>
+              </svg>
+            </div>
+            @for (item of statusDistribution; track item.label) {
+              <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--oms-border)">
+                <div style="width:10px;height:10px;border-radius:50%;flex-shrink:0" [style.background]="item.color"></div>
+                <span style="font-size:12px;color:var(--oms-text-secondary);flex:1">{{ item.label }}</span>
+                <span style="font-size:13px;font-weight:600">{{ item.pct }}%</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Orders Table -->
+    <div class="oms-card">
+      <div class="oms-card-header">
+        <div>
+          <div class="oms-card-title">Recent Confirmed Orders</div>
+          <div class="oms-card-subtitle">Latest confirmed orders from your system</div>
+        </div>
+        <a routerLink="/orders" class="btn-oms-secondary">
+          <mat-icon style="font-size:16px;width:16px;height:16px">open_in_new</mat-icon>
+          View all
+        </a>
+      </div>
+      @if (recentOrders.length === 0) {
+        <app-empty-state icon="receipt_long" title="No orders yet" message="Orders will appear here once placed"></app-empty-state>
+      } @else {
+        <div style="overflow-x:auto">
+          <table class="oms-table">
+            <thead>
+              <tr>
+                <th>Order #</th>
+                <th>Customer</th>
+                <th style="text-align:right">Amount</th>
+                <th>Status</th>
+                <th>Updated</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (order of recentOrders; track order.id) {
+                <tr style="cursor:pointer" [routerLink]="['/orders', order.id]">
+                  <td><span style="font-weight:600;color:var(--oms-blue)">{{ order.orderNumber }}</span></td>
+                  <td>
+                    <div style="font-weight:500">{{ order.customerName }}</div>
+                    <div style="font-size:11px;color:var(--oms-text-muted)">{{ order.customerEmail }}</div>
+                  </td>
+                  <td style="text-align:right;font-weight:600">{{ formatCurrency(order.totalAmount) }}</td>
+                  <td><app-badge [label]="order.status" [type]="getStatusBadgeType(order.status)"></app-badge></td>
+                  <td style="color:var(--oms-text-secondary);font-size:12px">{{ order.updatedAt | date:'dd MMM, HH:mm' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+</div>
