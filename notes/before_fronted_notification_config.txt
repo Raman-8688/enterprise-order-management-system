@@ -1,0 +1,487 @@
+🏗️ ENTERPRISE ORDER MANAGEMENT SYSTEM (OMS) - COMPLETE ARCHITECTURE GUIDE
+📋 Project Overview
+What We're Building
+A production-grade Enterprise Order Management System using Spring Boot Microservices. This is the kind of system used by companies like Amazon, Walmart, and Flipkart to manage their entire order lifecycle.
+
+Business Problem We're Solving
+text
+Problem: Enterprises need to manage:
+- Products across multiple categories
+- Inventory across warehouses
+- Customer orders end-to-end
+- Payments securely
+- Real-time order status tracking
+- Multi-service coordination
+
+Solution: Our OMS handles all of this with microservices!
+🎯 System Capabilities
+Feature	Description	Status
+Product Management	Create, update, search products	✅ Complete
+Inventory Management	Track stock, reserve items	✅ Complete
+Order Processing	Create orders with Saga pattern	✅ Complete
+Payment Processing	Handle payments async via Kafka	✅ Complete
+User Authentication	JWT-based secure login	✅ Complete
+Service Discovery	Eureka for dynamic service location	✅ Complete
+API Gateway	Single entry point with routing	✅ Complete
+Event-Driven Communication	Kafka for async events	✅ Complete
+Circuit Breakers	Resilience4j for fault tolerance	✅ Complete
+🏛️ Complete System Architecture
+High-Level Architecture Diagram
+text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                            CLIENT LAYER                                     │
+│                      (Angular Frontend - Coming Soon)                       │
+└─────────────────────────────────┬───────────────────────────────────────────┘
+                                  │
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         API GATEWAY (8080)                                  │
+│                    Spring Cloud Gateway                                     │
+│              JWT Validation + Request Routing + Circuit Breaker             │
+└─────────────────┬─────────────────┬─────────────────┬───────────────────────┘
+                  │                 │                 │
+                  ▼                 ▼                 ▼
+    ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
+    │   AUTH SERVICE  │ │  PRODUCT SERVICE│ │INVENTORY SERVICE│
+    │    (8081)       │ │    (8082)       │ │    (8083)       │
+    │                 │ │                 │ │                 │
+    │ - JWT Generation│ │ - CRUD Products │ │ - Stock Tracking│
+    │ - User Auth     │ │ - Search/SKU    │ │ - Reserve Stock │
+    │ - Role Mgmt     │ │ - Categories    │ │ - Warehouse Mgmt│
+    └─────────────────┘ └─────────────────┘ └─────────────────┘
+                            │                       │
+                            └───────────┬───────────┘
+                                        │
+                                        ▼
+                    ┌─────────────────────────────────────┐
+                    │        ORDER SERVICE (8084)          │
+                    │    Saga Pattern Orchestrator         │
+                    │                                      │
+                    │  ┌────────────────────────────────┐  │
+                    │  │ 1. Create Order (PENDING)      │  │
+                    │  │ 2. Reserve Inventory (HTTP)    │  │
+                    │  │ 3. Publish OrderCreatedEvent   │  │
+                    │  │ 4. Listen PaymentProcessedEvent│  │
+                    │  │ 5. Update Order Status         │  │
+                    │  └────────────────────────────────┘  │
+                    └─────────────────┬─────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────────┐
+                    │     PAYMENT SERVICE (8085)           │
+                    │    Kafka Consumer/Producer           │
+                    │                                      │
+                    │  ┌────────────────────────────────┐  │
+                    │  │ 1. Listen OrderCreatedEvent    │  │
+                    │  │ 2. Process Payment (Simulate) │  │
+                    │  │ 3. Save Payment Record        │  │
+                    │  │ 4. Publish PaymentProcessed   │  │
+                    │  └────────────────────────────────┘  │
+                    └─────────────────────────────────────┘
+                                      │
+                                      ▼
+                    ┌─────────────────────────────────────┐
+                    │        KAFKA (9092)                  │
+                    │    Event Bus / Message Broker        │
+                    │                                      │
+                    │  Topics:                             │
+                    │  ├── order-created-events           │
+                    │  ├── payment-processed-events        │
+                    │  └── order-status-events             │
+                    └─────────────────────────────────────┘
+🔄 Service Communication Flow
+1. Synchronous Communication (HTTP/Feign)
+text
+┌─────────────────────────────────────────────────────────────────┐
+│                    SYNCHRONOUS CALLS                            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  Order Service ──Feign HTTP──► Product Service                  │
+│       │                        "Get product details"            │
+│       │                        (GET /api/products/sku/{sku})    │
+│       │                                                         │
+│       └───Feign HTTP──► Inventory Service                       │
+│                            "Check and reserve stock"            │
+│                            (GET /api/inventory/{sku})           │
+│                            (POST /api/inventory/{sku}/reserve)  │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+2. Asynchronous Communication (Kafka Events)
+text
+┌─────────────────────────────────────────────────────────────────┐
+│                    ASYNCHRONOUS EVENTS                           │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  Order Service ──publish──► Kafka (order-created-events)        │
+│                                        │                         │
+│                                        ▼                         │
+│                             Payment Service ──consume──►        │
+│                                        │                         │
+│                                        ▼                         │
+│                             Payment Service ──publish──►        │
+│                                        │                         │
+│                                        ▼                         │
+│                             Kafka (payment-processed-events)    │
+│                                        │                         │
+│                                        ▼                         │
+│                             Order Service ──consume──►          │
+│                             (Update order status)               │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+📦 Service Details & Dependencies
+1. Discovery Server (Eureka)
+xml
+<!-- Dependencies -->
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+</dependency>
+Purpose: Service registry - all services register here to find each other.
+
+2. API Gateway
+xml
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-gateway</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+</dependency>
+Purpose: Single entry point, JWT validation, routing, circuit breakers.
+
+3. Auth Service
+xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+<dependency>
+    <groupId>io.jsonwebtoken</groupId>
+    <artifactId>jjwt-api</artifactId>
+</dependency>
+Purpose: JWT generation/validation, user authentication, role management.
+
+4. Product Service
+xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.postgresql</groupId>
+    <artifactId>postgresql</artifactId>
+</dependency>
+Purpose: CRUD operations, product search by SKU/name/category.
+
+5. Inventory Service
+xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-openfeign</artifactId>
+</dependency>
+Purpose: Stock management, reserve/release inventory, warehouse tracking.
+
+6. Order Service (Saga Orchestrator)
+xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springframework.kafka</groupId>
+    <artifactId>spring-kafka</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-openfeign</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
+</dependency>
+Purpose: Order creation, Saga orchestration, Kafka producer/consumer.
+
+7. Payment Service (Event Consumer)
+xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springframework.kafka</groupId>
+    <artifactId>spring-kafka</artifactId>
+</dependency>
+Purpose: Process payments, Kafka consumer/producer, payment tracking.
+
+🔐 Data Consistency & Saga Pattern
+How We Maintain Consistency
+text
+┌─────────────────────────────────────────────────────────────────┐
+│                    SAGA PATTERN FLOW                            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  Step 1: Create Order (PENDING)                                 │
+│          ↓                                                      │
+│  Step 2: Reserve Inventory (Compensatable)                     │
+│          ↓                                                      │
+│  Step 3: Process Payment (Compensatable)                       │
+│          ↓                                                      │
+│  Step 4: Confirm Order (CONFIRMED)                             │
+│                                                                  │
+│  ❌ If ANY step fails:                                          │
+│  Step 5: Execute Compensation                                  │
+│          ├── Release Inventory                                 │
+│          └── Mark Order as FAILED                              │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+Consistency Strategies
+Strategy	Implementation	Why Used
+Eventual Consistency	Saga pattern with Kafka	Orders don't wait for payments to complete
+Compensation	Release inventory on failure	Rollback changes automatically
+Idempotency	Check existing payments	Prevent duplicate processing
+At-least-once Delivery	Kafka consumer offsets	No message loss
+📊 Database Schema
+Each Service Owns Its Database
+text
+┌─────────────────────────────────────────────────────────────────┐
+│                    DATABASE PER SERVICE                         │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  productdb (PostgreSQL)                                         │
+│  ├── products (id, sku, name, price, category, active)         │
+│                                                                  │
+│  inventorydb (PostgreSQL)                                       │
+│  ├── inventory (id, sku, quantity, reserved, location)         │
+│                                                                  │
+│  orderdb (PostgreSQL)                                           │
+│  ├── orders (id, order_number, customer_email, status, total)  │
+│  └── order_items (id, order_id, product_sku, quantity, price)  │
+│                                                                  │
+│  paymentdb (PostgreSQL)                                         │
+│  └── payments (id, order_id, amount, status, transaction_id)   │
+│                                                                  │
+│  authdb (PostgreSQL)                                            │
+│  └── users (id, email, password_hash, role)                    │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+🔄 Complete Order Flow (End-to-End)
+Step-by-Step Flow
+text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    COMPLETE ORDER FLOW                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  1. User submits order via Angular UI                                       │
+│         ↓                                                                   │
+│  2. API Gateway validates JWT token                                         │
+│         ↓                                                                   │
+│  3. Order Service receives request                                          │
+│         ↓                                                                   │
+│  4. Order Service calls Product Service (Feign)                            │
+│     - Gets product details, price                                          │
+│         ↓                                                                   │
+│  5. Order Service calls Inventory Service (Feign)                          │
+│     - Checks stock availability                                            │
+│     - Reserves items (reduces available quantity)                          │
+│         ↓                                                                   │
+│  6. Order Service creates order (status: PENDING)                          │
+│         ↓                                                                   │
+│  7. Order Service publishes OrderCreatedEvent to Kafka                     │
+│         ↓                                                                   │
+│  8. Payment Service consumes OrderCreatedEvent                              │
+│         ↓                                                                   │
+│  9. Payment Service processes payment (simulates gateway)                  │
+│     - Creates payment record (status: COMPLETED/FAILED)                   │
+│         ↓                                                                   │
+│  10. Payment Service publishes PaymentProcessedEvent to Kafka              │
+│         ↓                                                                   │
+│  11. Order Service consumes PaymentProcessedEvent                          │
+│         ↓                                                                   │
+│  12. Order Service updates order status:                                    │
+│      - If COMPLETED → CONFIRMED                                            │
+│      - If FAILED → FAILED (releases inventory)                           │
+│         ↓                                                                   │
+│  13. User sees order confirmation                                           │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+🔧 Resilience & Fault Tolerance
+Circuit Breaker Configuration
+yaml
+resilience4j:
+  circuitbreaker:
+    instances:
+      productService:
+        sliding-window-size: 10        # Track last 10 calls
+        failure-rate-threshold: 50     # Open circuit at 50% failures
+        wait-duration-in-open-state: 5s  # Wait 5 seconds before retry
+What Happens When Services Fail
+text
+┌─────────────────────────────────────────────────────────────────┐
+│                    FAILURE SCENARIOS                            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  Scenario 1: Inventory Service Down                            │
+│  → Circuit Breaker opens after 5 failures                      │
+│  → Fallback returns "Stock unavailable"                        │
+│  → Order fails gracefully with proper message                  │
+│                                                                  │
+│  Scenario 2: Payment Service Down                              │
+│  → Kafka stores OrderCreatedEvent                              │
+│  → When Payment Service restarts, it consumes pending events   │
+│  → No order loss!                                              │
+│                                                                  │
+│  Scenario 3: Kafka Down                                         │
+│  → Order Service still creates order                           │
+│  → Payment Service retries consuming messages later            │
+│  → Circuit breaker prevents cascading failures                 │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+📦 Complete Dependency List
+Parent POM (Root)
+xml
+<properties>
+    <java.version>17</java.version>
+    <spring-boot.version>3.2.0</spring-boot.version>
+    <spring-cloud.version>2023.0.0</spring-cloud.version>
+</properties>
+All Dependencies Used
+Category	Dependencies	Services Using
+Spring Boot	web, data-jpa, validation, actuator	All services
+Spring Cloud	eureka, gateway, openfeign, config	All services
+Resilience4j	circuitbreaker, retry	Gateway, Order Service
+Kafka	spring-kafka	Order, Payment services
+Database	postgresql, hikari	All services
+Security	spring-security, jjwt	Auth, Gateway
+Utilities	lombok, commons-lang3	All services
+🎯 What We've Accomplished
+✅ Completed Services (7 Microservices)
+Service	Port	Status	Purpose
+Discovery Server	8761	✅	Service registry
+API Gateway	8080	✅	Routing, auth
+Auth Service	8081	✅	JWT, login
+Product Service	8082	✅	Products
+Inventory Service	8083	✅	Stock
+Order Service	8084	✅	Orders, Saga
+Payment Service	8085	✅	Payments
+✅ Infrastructure
+Component	Port	Status	Purpose
+Kafka	9092	✅	Event bus
+Zookeeper	2181	✅	Kafka coordination
+Kafka UI	8086	✅	Event monitoring
+PostgreSQL	5432	✅	Database
+✅ Patterns Implemented
+Pattern	Status	Location
+Service Discovery	✅	Eureka
+API Gateway	✅	Spring Cloud Gateway
+Circuit Breaker	✅	Resilience4j
+Saga Pattern	✅	Order Service
+Event-Driven	✅	Kafka
+CQRS (Partial)	✅	Event sourcing via Kafka
+🚀 Next Steps (Frontend & Production)
+Phase 6: Frontend Development (In Progress)
+text
+┌─────────────────────────────────────────────────────────────────┐
+│                    FRONTEND ROADMAP                             │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ✅ Angular Project Setup                                       │
+│  ✅ Folder Structure                                            │
+│  ✅ Auth Module (Login page)                                    │
+│  ⏳ Dashboard Component                                        │
+│  ⏳ Product Listing (Grid view)                                │
+│  ⏳ Order Creation Flow                                        │
+│  ⏳ Profile Settings                                           │
+│  ⏳ Payment View                                               │
+│  ⏳ Inventory Dashboard                                        │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+Phase 7: Production Hardening
+text
+1. Dockerize all services
+2. Kubernetes deployment manifests
+3. CI/CD pipeline (GitHub Actions)
+4. Monitoring (Prometheus + Grafana)
+5. Distributed Tracing (Zipkin/Jaeger)
+6. Centralized Logging (ELK Stack)
+7. Performance Testing
+8. Security Hardening (SSL, secrets management)
+📊 System Metrics
+Current Capabilities
+Metric	Value
+Services	7 microservices
+Databases	4 (product, inventory, order, payment)
+Kafka Topics	4
+API Endpoints	30+
+Dependencies	15+ Spring Boot starters
+Patterns	5 (Saga, Circuit Breaker, etc.)
+🎤 Team Lead / Teacher Explanation
+"What is this project?"
+"We're building an Enterprise Order Management System - the backbone of e-commerce operations. It's designed to handle the complexity of modern online retail: millions of products, real-time inventory, orders, payments, and everything that happens between 'Add to Cart' and 'Order Delivered'."
+
+"Why Microservices?"
+"We chose microservices because:
+
+Independent scaling - Order Service can scale during sales, Product Service doesn't need to
+
+Team autonomy - Teams can work independently on each service
+
+Technology flexibility - Each service can use different technologies if needed
+
+Fault isolation - Payment service failure doesn't crash the entire system"
+
+"Why Saga Pattern?"
+"Traditional distributed transactions (2PC) are slow and lock resources. Saga Pattern provides eventual consistency - orders complete faster, and if something fails, we gracefully rollback using compensation transactions."
+
+"Why Kafka?"
+"Kafka provides asynchronous, decoupled communication. If Payment Service is down during a sale, orders still get created. Events are stored in Kafka and replayed when Payment Service recovers. No lost orders!"
+
+✅ Quick Reference Commands
+powershell
+# Start everything
+cd D:\enterprise-order-management-system\scripts
+.\start-all.ps1
+
+# Check health
+.\check-health.ps1
+
+# Check Kafka topics
+docker exec kafka kafka-topics --bootstrap-server localhost:9092 --list
+
+# Verify all services in Eureka
+curl http://localhost:8761/eureka/apps
+
+# Create test order
+curl -X POST http://localhost:8080/api/orders -H "Content-Type: application/json" -d '{"customerEmail":"test@test.com","customerName":"Test","shippingAddress":"Test","items":[{"productSku":"LAPTOP-002","quantity":1}]}'
+
+# Check payment
+curl http://localhost:8080/api/payments/order/{orderId}
+🎯 Project Summary
+text
+┌─────────────────────────────────────────────────────────────────┐
+│                    PROJECT COMPLETE                             │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ✅ 7 Microservices Running                                      │
+│  ✅ Service Discovery (Eureka)                                   │
+│  ✅ API Gateway with JWT                                        │
+│  ✅ Saga Pattern with Kafka                                     │
+│  ✅ Circuit Breakers (Resilience4j)                             │
+│  ✅ Complete Order Flow                                         │
+│  ✅ Payment Processing                                          │
+│  ✅ Event-Driven Architecture                                   │
+│  ✅ Database Per Service                                        │
+│  ✅ Docker Compose for Infrastructure                           │
+│                                                                  │
+│  ⏳ Angular Frontend (In Progress)                              │
+│  ⏳ Kubernetes Deployment (Next)                                │
+│  ⏳ CI/CD Pipeline (Next)                                       │
+│  ⏳ Monitoring Stack (Next)                                     │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+This is a production-ready microservices architecture that can scale to handle millions of orders! 🚀
+

@@ -124,6 +124,30 @@ http://localhost:8080/api/payments/order/965e1343-a3f6-4dbc-98d5-7bb3eee79efa
 
 
 -===
+
+cd D:\enterprise-order-management-system\docker
+
+# 1. Full restart
+docker-compose -f docker-compose-kafka.yml down -v
+docker-compose -f docker-compose-kafka.yml up -d
+
+# 2. Wait 30 seconds
+Start-Sleep -Seconds 30
+
+# 3. Check container logs for errors
+docker logs kafka 2>&1 | Select-String -Pattern "ERROR|started"
+
+# 4. Test with different methods
+echo "Testing Kafka connection..."
+
+# Method 1: Using localhost from inside container
+docker exec kafka curl -s http://localhost:9092 2>&1
+
+# Method 2: Using netcat
+docker exec kafka nc -zv localhost 9092 2>&1
+
+# Method 3: List topics (this should work)
+docker exec kafka kafka-topics --bootstrap-server localhost:9092 --list 2>&1
 COMPLETE KAFKA TESTING GUIDE
 Test 1: Verify Kafka Topics Exist
 # List all Kafka topics
