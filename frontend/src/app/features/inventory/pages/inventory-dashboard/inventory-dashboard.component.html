@@ -1,0 +1,201 @@
+<app-topbar title="Inventory" subtitle="Monitor and manage stock levels"></app-topbar>
+
+<div class="page-body">
+  <app-page-header title="Inventory" [subtitle]="stats.total + ' SKUs tracked'">
+    <button class="btn-oms-secondary" (click)="load()">
+      <mat-icon style="font-size:16px;width:16px;height:16px">refresh</mat-icon>Refresh
+    </button>
+    <button class="btn-oms-primary" (click)="showInitForm=!showInitForm">
+      <mat-icon style="font-size:16px;width:16px;height:16px">add</mat-icon>Initialize stock
+    </button>
+  </app-page-header>
+
+  <!-- Init Form -->
+  @if (showInitForm) {
+    <div class="oms-card mb-3" style="border:1px solid var(--oms-blue)">
+      <div class="oms-card-header" style="background:var(--oms-blue-light)">
+        <div class="oms-card-title">Initialize Inventory for a SKU</div>
+        <button mat-icon-button (click)="showInitForm=false"><mat-icon>close</mat-icon></button>
+      </div>
+      <div class="oms-card-body">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-4">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>SKU *</mat-label>
+              <input matInput [(ngModel)]="initForm.sku" placeholder="e.g. LAPTOP-002" />
+              <mat-icon matSuffix>tag</mat-icon>
+            </mat-form-field>
+          </div>
+          <div class="col-md-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Quantity</mat-label>
+              <input matInput type="number" [(ngModel)]="initForm.quantity" min="1" />
+            </mat-form-field>
+          </div>
+          <div class="col-md-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Location</mat-label>
+              <input matInput [(ngModel)]="initForm.location" placeholder="WAREHOUSE_MAIN" />
+              <mat-icon matSuffix>warehouse</mat-icon>
+            </mat-form-field>
+          </div>
+          <div class="col-md-2" style="padding-bottom:22px">
+            <button class="btn-oms-primary w-100" style="height:56px" (click)="onInitialize()" [disabled]="initLoading">
+              @if (initLoading) { <mat-spinner diameter="16"></mat-spinner> }
+              @else { <mat-icon style="font-size:16px;width:16px;height:16px">rocket_launch</mat-icon> }
+              Initialize
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Restock Modal -->
+  @if (showRestock) {
+    <div class="oms-modal-backdrop" (click)="showRestock=false">
+      <div class="oms-modal" (click)="$event.stopPropagation()">
+        <div class="oms-modal-header">
+          <h3 style="display:flex;align-items:center;gap:8px">
+            <mat-icon style="color:var(--oms-blue)">add_circle</mat-icon>
+            Restock — {{ restockSku }}
+          </h3>
+          <button mat-icon-button (click)="showRestock=false"><mat-icon>close</mat-icon></button>
+        </div>
+        <div class="oms-modal-body">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Quantity to add</mat-label>
+            <input matInput type="number" [(ngModel)]="restockQty" min="1" />
+            <mat-icon matSuffix>add_circle_outline</mat-icon>
+          </mat-form-field>
+        </div>
+        <div class="oms-modal-footer">
+          <button class="btn-oms-secondary" (click)="showRestock=false">Cancel</button>
+          <button class="btn-oms-primary" (click)="onRestock()" [disabled]="restockLoading">
+            @if (restockLoading) { <mat-spinner diameter="16"></mat-spinner> }
+            @else { <mat-icon style="font-size:16px;width:16px;height:16px">add_circle</mat-icon> }
+            Restock
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- KPI Cards -->
+  <div class="row g-3 mb-3">
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="stat-card-label">
+          <div class="stat-card-icon" style="background:#dcfce7">
+            <mat-icon style="color:#16a34a;font-size:18px;width:18px;height:18px">check_circle</mat-icon>
+          </div>In Stock
+        </div>
+        <div class="stat-card-value">{{ stats.inStock }}</div>
+        <div class="stat-card-change positive"><mat-icon style="font-size:14px;width:14px;height:14px">trending_up</mat-icon>Healthy</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="stat-card-label">
+          <div class="stat-card-icon" style="background:#fef9c3">
+            <mat-icon style="color:#a16207;font-size:18px;width:18px;height:18px">warning</mat-icon>
+          </div>Low Stock
+        </div>
+        <div class="stat-card-value">{{ stats.lowStock }}</div>
+        <div class="stat-card-change" [class.negative]="stats.lowStock>0" [class.positive]="stats.lowStock===0">
+          <mat-icon style="font-size:14px;width:14px;height:14px">{{ stats.lowStock>0?'trending_down':'check' }}</mat-icon>
+          {{ stats.lowStock>0?'Needs restock':'All fine' }}
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="stat-card-label">
+          <div class="stat-card-icon" style="background:#fee2e2">
+            <mat-icon style="color:#dc2626;font-size:18px;width:18px;height:18px">remove_circle</mat-icon>
+          </div>Out of Stock
+        </div>
+        <div class="stat-card-value">{{ stats.outOfStock }}</div>
+        <div class="stat-card-change" [class.negative]="stats.outOfStock>0" [class.positive]="stats.outOfStock===0">
+          <mat-icon style="font-size:14px;width:14px;height:14px">{{ stats.outOfStock>0?'error':'check' }}</mat-icon>
+          {{ stats.outOfStock>0?'Action required':'All good' }}
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="stat-card-label">
+          <div class="stat-card-icon" style="background:#dbeafe">
+            <mat-icon style="color:#1d4ed8;font-size:18px;width:18px;height:18px">category</mat-icon>
+          </div>Total SKUs
+        </div>
+        <div class="stat-card-value">{{ stats.total }}</div>
+        <div class="stat-card-change neutral"><mat-icon style="font-size:14px;width:14px;height:14px">info</mat-icon>Tracked</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Inventory Table -->
+  <div class="oms-card">
+    @if (loading) {
+      <app-loading-spinner></app-loading-spinner>
+    } @else if (items.length === 0) {
+      <app-empty-state icon="warehouse" title="No inventory data"
+                       message="Initialize stock for a product to get started">
+        <button class="btn-oms-primary" style="margin-top:16px" (click)="showInitForm=true">
+          <mat-icon style="font-size:16px;width:16px;height:16px">add</mat-icon>Initialize stock
+        </button>
+      </app-empty-state>
+    } @else {
+      <div style="overflow-x:auto">
+        <table class="oms-table">
+          <thead>
+            <tr>
+              <th>SKU</th><th>Location</th>
+              <th style="text-align:center">Total</th>
+              <th style="text-align:center">Reserved</th>
+              <th style="text-align:center">Available</th>
+              <th style="min-width:150px">Level</th>
+              <th>Status</th>
+              <th style="text-align:center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of items; track item.sku) {
+              <tr>
+                <td>
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <span style="font-weight:600;font-family:monospace;font-size:12px">{{ item.sku }}</span>
+                    @if (item.needsReorder) {
+                      <span class="oms-badge badge-warning" style="font-size:10px">Reorder</span>
+                    }
+                  </div>
+                </td>
+                <td style="font-size:12px;color:var(--oms-text-secondary)">{{ item.location }}</td>
+                <td style="text-align:center;font-weight:500">{{ item.quantity }}</td>
+                <td style="text-align:center;color:var(--oms-warning);font-weight:500">{{ item.reservedQuantity }}</td>
+                <td style="text-align:center;font-weight:700;font-size:15px">{{ item.availableQuantity }}</td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <mat-progress-bar mode="determinate" [value]="stockPct(item)"
+                                      [style.--mdc-linear-progress-active-indicator-color]="stockColor(item)"
+                                      style="flex:1;border-radius:4px">
+                    </mat-progress-bar>
+                    <span style="font-size:11px;color:var(--oms-text-muted);width:32px;text-align:right">{{ stockPct(item) }}%</span>
+                  </div>
+                </td>
+                <td><app-badge [label]="stockLabel(item)" [type]="getBadgeType(item)"></app-badge></td>
+                <td style="text-align:center">
+                  <button class="btn-oms-secondary" style="height:28px;padding:0 10px;font-size:11px" (click)="openRestock(item.sku)">
+                    <mat-icon style="font-size:14px;width:14px;height:14px">add_circle_outline</mat-icon>
+                    Restock
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>

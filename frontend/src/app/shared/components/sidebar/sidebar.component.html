@@ -1,0 +1,64 @@
+<nav class="oms-sidebar">
+  <!-- Logo -->
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-icon">
+      <mat-icon style="color:#fff;font-size:20px;width:20px;height:20px">inventory</mat-icon>
+    </div>
+    <div>
+      <span class="sidebar-logo-text">Enterprise OMS</span>
+      <span class="sidebar-logo-sub">v1.0.0</span>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="sidebar-section">
+    <span class="sidebar-section-label">Main</span>
+    @for (item of mainNav; track item.route) {
+      <a class="sidebar-nav-item"
+         [routerLink]="item.route"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{exact: item.route === '/dashboard'}">
+        <mat-icon style="font-size:18px;width:18px;height:18px">{{ item.icon }}</mat-icon>
+        {{ item.label }}
+        @if (item.badge) {
+          <span class="sidebar-nav-badge">{{ item.badge }}</span>
+        }
+      </a>
+    }
+  </div>
+
+  <!-- Finance -->
+  <div class="sidebar-section">
+    <span class="sidebar-section-label">Finance</span>
+    @for (item of financeNav; track item.route) {
+      <a class="sidebar-nav-item" [routerLink]="item.route" routerLinkActive="active">
+        <mat-icon style="font-size:18px;width:18px;height:18px">{{ item.icon }}</mat-icon>
+        {{ item.label }}
+      </a>
+    }
+  </div>
+
+  <!-- System -->
+  <div class="sidebar-section">
+    <span class="sidebar-section-label">System</span>
+    @for (item of systemNav; track item.route) {
+      <a class="sidebar-nav-item" [routerLink]="item.route" routerLinkActive="active">
+        <mat-icon style="font-size:18px;width:18px;height:18px">{{ item.icon }}</mat-icon>
+        {{ item.label }}
+      </a>
+    }
+    <span class="sidebar-nav-item" style="cursor:pointer" (click)="logout()">
+      <mat-icon style="font-size:18px;width:18px;height:18px;color:#f87171">logout</mat-icon>
+      <span style="color:#f87171">Sign out</span>
+    </span>
+  </div>
+
+  <!-- User footer -->
+  <div class="sidebar-user">
+    <div class="sidebar-user-avatar">{{ userInitials }}</div>
+    <div style="overflow:hidden;flex:1">
+      <div class="sidebar-user-name truncate">{{ userDisplayName }}</div>
+      <div class="sidebar-user-role truncate">{{ userEmail }}</div>
+    </div>
+  </div>
+</nav>

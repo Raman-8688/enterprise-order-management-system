@@ -1,0 +1,109 @@
+<app-topbar title="Products" subtitle="Manage your product catalogue"></app-topbar>
+
+<div class="page-body">
+  <app-page-header title="Products" [subtitle]="total + ' products in catalogue'">
+    <a routerLink="/products/create" class="btn-oms-primary">
+      <mat-icon style="font-size:16px;width:16px;height:16px">add</mat-icon>Add product
+    </a>
+  </app-page-header>
+
+  <!-- Filters -->
+  <div class="oms-card mb-3">
+    <div style="padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <div class="search-box">
+        <mat-icon style="font-size:18px;width:18px;height:18px">search</mat-icon>
+        <input placeholder="Search by name or SKU…" [(ngModel)]="search"
+               (keyup.enter)="onSearch()" (input)="search.length === 0 && onSearch()" />
+      </div>
+      <div class="filter-chips">
+        @for (f of filters; track f) {
+          <button class="filter-chip" [class.active]="filter === f" (click)="onFilter(f)">{{ f }}</button>
+        }
+      </div>
+      <button class="btn-oms-secondary" style="margin-left:auto" (click)="load()">
+        <mat-icon style="font-size:16px;width:16px;height:16px">refresh</mat-icon>Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="oms-card">
+    @if (loading) {
+      <app-loading-spinner></app-loading-spinner>
+    } @else if (products.length === 0) {
+      <app-empty-state icon="inventory_2" title="No products found"
+                       message="Try adjusting your search or add a new product">
+        <a routerLink="/products/create" class="btn-oms-primary" style="margin-top:16px">
+          <mat-icon style="font-size:16px;width:16px;height:16px">add</mat-icon>Add product
+        </a>
+      </app-empty-state>
+    } @else {
+      <div style="overflow-x:auto">
+        <table class="oms-table">
+          <thead>
+            <tr>
+              <th>Product</th><th>SKU</th><th>Category</th><th>Brand</th>
+              <th style="text-align:right">Price</th><th>Status</th>
+              <th style="text-align:center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of products; track p.id) {
+              <tr>
+                <td>
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <div style="width:36px;height:36px;border-radius:8px;background:var(--oms-bg);border:1px solid var(--oms-border);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                      <mat-icon style="font-size:18px;width:18px;height:18px;color:var(--oms-text-muted)">inventory_2</mat-icon>
+                    </div>
+                    <div>
+                      <div style="font-weight:500">{{ p.name }}</div>
+                      <div style="font-size:11px;color:var(--oms-text-muted)">{{ p.sku }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="color:var(--oms-text-secondary);font-size:12px;font-family:monospace">{{ p.sku }}</td>
+                <td><span class="oms-badge badge-info">{{ p.category }}</span></td>
+                <td style="color:var(--oms-text-secondary)">{{ p.brand ?? '—' }}</td>
+                <td style="text-align:right;font-weight:600">{{ p.price | currency:'INR':'symbol':'1.2-2' }}</td>
+                <td><app-badge [label]="getStockBadge(p).label" [type]="getStockBadge(p).type"></app-badge></td>
+                <td>
+                  <div style="display:flex;align-items:center;justify-content:center;gap:6px">
+                    <a [routerLink]="['/products', p.sku]" class="btn-icon" matTooltip="View">
+                      <mat-icon style="font-size:16px;width:16px;height:16px">visibility</mat-icon>
+                    </a>
+                    <button class="btn-icon danger" (click)="confirmDelete(p.id)" matTooltip="Delete">
+                      <mat-icon style="font-size:16px;width:16px;height:16px">delete</mat-icon>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="oms-pagination">
+        <span class="pagination-info">Showing {{ page * size + 1 }}–{{ page * size + products.length }} of {{ total }}</span>
+        <div class="pagination-btns">
+          <button class="page-btn" (click)="goToPage(page-1)" [disabled]="page===0">
+            <mat-icon style="font-size:14px;width:14px;height:14px">chevron_left</mat-icon>
+          </button>
+          @for (p of pages; track p) {
+            <button class="page-btn" [class.active]="p===page" (click)="goToPage(p)">{{ p+1 }}</button>
+          }
+          <button class="page-btn" (click)="goToPage(page+1)" [disabled]="page>=totalPages-1">
+            <mat-icon style="font-size:14px;width:14px;height:14px">chevron_right</mat-icon>
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<app-confirm-dialog
+  [visible]="showConfirm"
+  title="Delete product"
+  message="This product will be permanently removed. This action cannot be undone."
+  confirmLabel="Delete"
+  (confirmed)="doDelete()"
+  (cancelled)="showConfirm=false">
+</app-confirm-dialog>

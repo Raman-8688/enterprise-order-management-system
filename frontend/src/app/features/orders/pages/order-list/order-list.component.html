@@ -1,0 +1,185 @@
+<app-topbar title="Orders" subtitle="Manage all customer orders"></app-topbar>
+
+<div class="page-body">
+  <app-page-header title="Orders" [subtitle]="total + ' total orders'">
+    <a routerLink="/orders/create" class="btn-oms-primary">
+      <mat-icon style="font-size:16px;width:16px;height:16px">add</mat-icon>New order
+    </a>
+  </app-page-header>
+
+  <div style="display:grid;grid-template-columns:1fr 380px;gap:16px;align-items:start">
+    <!-- Left: Order List -->
+    <div>
+      <div class="oms-card mb-3">
+        <div style="display:flex;gap:0;overflow-x:auto;border-bottom:1px solid var(--oms-border)">
+          @for (tab of tabs; track tab.value) {
+            <button (click)="switchTab(tab.value)"
+              style="padding:12px 16px;font-size:13px;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all 0.2s"
+              [style.color]="activeTab===tab.value ? 'var(--oms-blue)' : 'var(--oms-text-secondary)'"
+              [style.border-bottom-color]="activeTab===tab.value ? 'var(--oms-blue)' : 'transparent'"
+              [style.font-weight]="activeTab===tab.value ? '600' : '400'">
+              {{ tab.label }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="oms-card">
+        @if (loading) {
+          <app-loading-spinner></app-loading-spinner>
+        } @else if (orders.length === 0) {
+          <app-empty-state icon="receipt_long" title="No orders found" message="Orders matching this filter will appear here"></app-empty-state>
+        } @else {
+          <div style="overflow-x:auto">
+            <table class="oms-table">
+              <thead>
+                <tr>
+                  <th>Order #</th><th>Customer</th>
+                  <th style="text-align:right">Amount</th><th>Status</th>
+                  <th>Updated</th><th style="text-align:center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (order of orders; track order.id) {
+                  <tr style="cursor:pointer"
+                      [style.background]="selectedOrder?.id===order.id ? 'var(--oms-blue-light)' : ''"
+                      (click)="selectOrder(order)">
+                    <td><span style="font-weight:600;color:var(--oms-blue);font-size:12px">{{ order.orderNumber }}</span></td>
+                    <td>
+                      <div style="font-weight:500">{{ order.customerName }}</div>
+                      <div style="font-size:11px;color:var(--oms-text-muted)">{{ order.customerEmail }}</div>
+                    </td>
+                    <td style="text-align:right;font-weight:600">{{ order.totalAmount | currency:'INR':'symbol':'1.0-0' }}</td>
+                    <td><app-badge [label]="order.status" [type]="getBadgeType(order.status)"></app-badge></td>
+                    <td style="font-size:12px;color:var(--oms-text-secondary)">{{ order.updatedAt | date:'dd MMM, HH:mm' }}</td>
+                    <td>
+                      <div style="display:flex;justify-content:center;gap:4px">
+                        <a [routerLink]="['/orders', order.id]" class="btn-icon info" matTooltip="Full detail" (click)="$event.stopPropagation()">
+                          <mat-icon style="font-size:16px;width:16px;height:16px">open_in_new</mat-icon>
+                        </a>
+                        @if (canCancel(order.status)) {
+                          <button class="btn-icon danger" matTooltip="Cancel" (click)="$event.stopPropagation(); confirmCancel(order)">
+                            <mat-icon style="font-size:16px;width:16px;height:16px">cancel</mat-icon>
+                          </button>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <div class="oms-pagination">
+            <span class="pagination-info">Showing {{ orders.length }} of {{ total }}</span>
+            <div class="pagination-btns">
+              <button class="page-btn" (click)="goToPage(page-1)" [disabled]="page===0">
+                <mat-icon style="font-size:14px;width:14px;height:14px">chevron_left</mat-icon>
+              </button>
+              @for (p of pages; track p) {
+                <button class="page-btn" [class.active]="p===page" (click)="goToPage(p)">{{ p+1 }}</button>
+              }
+              <button class="page-btn" (click)="goToPage(page+1)" [disabled]="page>=totalPages-1">
+                <mat-icon style="font-size:14px;width:14px;height:14px">chevron_right</mat-icon>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Right: Detail Panel -->
+    <div>
+      @if (selectedOrder) {
+        <div class="oms-card" style="position:sticky;top:80px">
+          <div class="oms-card-header" style="flex-direction:column;align-items:flex-start;gap:6px">
+            <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+              <div class="oms-card-title">{{ selectedOrder.orderNumber }}</div>
+              <app-badge [label]="selectedOrder.status" [type]="getBadgeType(selectedOrder.status)"></app-badge>
+            </div>
+            <div style="font-size:12px;color:var(--oms-text-secondary)">
+              {{ selectedOrder.customerName }} · {{ selectedOrder.customerEmail }}
+            </div>
+          </div>
+          <div class="oms-card-body">
+            @if (!['FAILED','CANCELLED'].includes(selectedOrder.status)) {
+              <div style="margin-bottom:20px">
+                <div style="font-size:11px;font-weight:600;color:var(--oms-text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">Timeline</div>
+                <div class="timeline">
+                  @for (step of timelineSteps(selectedOrder.status); track step.label; let last = $last) {
+                    <div class="tl-item">
+                      <div class="tl-line">
+                        <div class="tl-dot"
+                             [style.border-color]="step.done ? 'var(--oms-success)' : 'var(--oms-border)'"
+                             [style.background]="step.done ? 'var(--oms-success-bg)' : 'var(--oms-bg)'">
+                        </div>
+                        @if (!last) {
+                          <div class="tl-connector" [style.background]="step.done ? 'var(--oms-success-bg)' : 'var(--oms-border)'"></div>
+                        }
+                      </div>
+                      <div class="tl-content">
+                        <div class="tl-label" [style.color]="step.done ? 'var(--oms-text)' : 'var(--oms-text-muted)'">{{ step.label }}</div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            <div style="font-size:11px;font-weight:600;color:var(--oms-text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">
+              Items ({{ selectedOrder.items.length }})
+            </div>
+            @for (item of selectedOrder.items; track item.productSku) {
+              <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--oms-border)">
+                <div>
+                  <div style="font-size:13px;font-weight:500">{{ item.productName ?? item.productSku }}</div>
+                  <div style="font-size:11px;color:var(--oms-text-muted)">{{ item.productSku }} × {{ item.quantity }}</div>
+                </div>
+                <div style="font-size:13px;font-weight:600">{{ item.subtotal | currency:'INR':'symbol':'1.0-0' }}</div>
+              </div>
+            }
+
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0 4px">
+              <span style="font-size:14px;font-weight:600">Total</span>
+              <span style="font-size:18px;font-weight:700;color:var(--oms-blue)">{{ selectedOrder.totalAmount | currency:'INR':'symbol':'1.0-0' }}</span>
+            </div>
+
+            @if (selectedOrder.failureReason) {
+              <div class="oms-alert error" style="font-size:12px;margin-bottom:12px">
+                <mat-icon style="font-size:16px;width:16px;height:16px">error</mat-icon>
+                {{ selectedOrder.failureReason }}
+              </div>
+            }
+
+            <div style="display:flex;gap:8px;margin-top:12px">
+              <a [routerLink]="['/orders', selectedOrder.id]" class="btn-oms-secondary" style="flex:1;justify-content:center">
+                <mat-icon style="font-size:16px;width:16px;height:16px">open_in_new</mat-icon>Full detail
+              </a>
+              @if (canCancel(selectedOrder.status)) {
+                <button class="btn-oms-danger" (click)="confirmCancel(selectedOrder)" style="flex:1;justify-content:center">
+                  <mat-icon style="font-size:16px;width:16px;height:16px">cancel</mat-icon>Cancel
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div class="oms-card">
+          <div class="empty-state">
+            <mat-icon style="font-size:48px;width:48px;height:48px;color:var(--oms-border)">touch_app</mat-icon>
+            <h3>Select an order</h3>
+            <p>Click any row to see its details here</p>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<app-confirm-dialog
+  [visible]="showCancel"
+  title="Cancel Order"
+  [message]="'Cancel order ' + (selectedOrder?.orderNumber ?? '') + '? This will release reserved inventory.'"
+  confirmLabel="Cancel Order"
+  (confirmed)="doCancel()"
+  (cancelled)="showCancel=false">
+</app-confirm-dialog>

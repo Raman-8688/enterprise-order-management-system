@@ -1,0 +1,90 @@
+<app-topbar title="Product Detail"></app-topbar>
+
+<div class="page-body">
+  @if (loading) {
+    <app-loading-spinner></app-loading-spinner>
+  } @else if (product) {
+    <app-page-header [title]="product.name" [subtitle]="'SKU: ' + product.sku">
+      <a routerLink="/products" class="btn-oms-secondary">
+        <mat-icon style="font-size:16px;width:16px;height:16px">arrow_back</mat-icon>Back
+      </a>
+    </app-page-header>
+
+    <div class="row g-3">
+      <div class="col-12 col-lg-8">
+        <div class="oms-card mb-3">
+          <div class="oms-card-header"><div class="oms-card-title">Product Details</div></div>
+          <div class="oms-card-body">
+            <div class="row g-3">
+              @for (field of [
+                {label:'SKU',        value:product.sku},
+                {label:'Category',   value:product.category},
+                {label:'Brand',      value:product.brand ?? '—'},
+                {label:'Price',      value:(product.price | currency:'INR':'symbol':'1.2-2')},
+                {label:'Weight',     value:product.weight ? product.weight + ' kg' : '—'},
+                {label:'Dimensions', value:product.dimensions ?? '—'},
+                {label:'Created by', value:product.createdBy ?? '—'},
+                {label:'Created',    value:(product.createdAt | date:'dd MMM yyyy') ?? '—'}
+              ]; track field.label) {
+                <div class="col-6">
+                  <div style="font-size:11px;font-weight:600;color:var(--oms-text-secondary);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px">{{ field.label }}</div>
+                  <div style="font-size:14px;font-weight:500">{{ field.value }}</div>
+                </div>
+              }
+            </div>
+            @if (product.description) {
+              <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--oms-border)">
+                <div style="font-size:11px;font-weight:600;color:var(--oms-text-secondary);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px">Description</div>
+                <p style="font-size:14px;color:var(--oms-text-secondary);line-height:1.6">{{ product.description }}</p>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-4">
+        <div class="oms-card mb-3">
+          <div class="oms-card-header"><div class="oms-card-title">Live Stock Status</div></div>
+          <div class="oms-card-body">
+            @if (stockStatus) {
+              <div style="text-align:center;padding:10px 0">
+                <div style="font-size:48px;font-weight:700;color:var(--oms-text);line-height:1">{{ stockStatus.availableQuantity }}</div>
+                <div style="font-size:12px;color:var(--oms-text-secondary);margin-top:4px">units available</div>
+                <div style="margin-top:12px">
+                  <app-badge
+                    [label]="stockStatus.inventoryAvailable ? 'In Stock' : 'Out of Stock'"
+                    [type]="stockStatus.inventoryAvailable ? 'success' : 'danger'">
+                  </app-badge>
+                </div>
+                @if (stockStatus.circuitBreakerOpen) {
+                  <div class="oms-alert warning" style="margin-top:12px;font-size:12px">
+                    <mat-icon style="font-size:16px;width:16px;height:16px">warning</mat-icon>
+                    Inventory service degraded
+                  </div>
+                }
+                <p style="font-size:12px;color:var(--oms-text-secondary);margin-top:12px">{{ stockStatus.message }}</p>
+              </div>
+            } @else {
+              <div class="empty-state" style="padding:20px">
+                <mat-icon style="font-size:36px;width:36px;height:36px;color:var(--oms-border)">warehouse</mat-icon>
+                <p style="margin-top:8px;color:var(--oms-text-secondary)">No inventory data</p>
+              </div>
+            }
+          </div>
+        </div>
+        <div class="oms-card">
+          <div class="oms-card-header"><div class="oms-card-title">Status</div></div>
+          <div class="oms-card-body">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+              <span style="font-size:13px;color:var(--oms-text-secondary)">Product active</span>
+              <app-badge [label]="product.active ? 'Active' : 'Inactive'" [type]="product.active ? 'success' : 'danger'"></app-badge>
+            </div>
+            <a routerLink="/inventory" class="btn-oms-secondary w-100" style="justify-content:center">
+              <mat-icon style="font-size:16px;width:16px;height:16px">warehouse</mat-icon>Manage inventory
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
