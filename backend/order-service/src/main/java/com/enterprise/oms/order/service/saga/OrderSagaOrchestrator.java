@@ -33,31 +33,24 @@ public class OrderSagaOrchestrator {
     public Order processOrder(CreateOrderRequest request) {
         log.info("Starting Saga orchestration for order from customer: {}", request.getCustomerEmail());
 
-        // Step 1: Create Order in PENDING state
         Order order = createPendingOrder(request);
         order = orderRepository.save(order);
         log.info("Order created with ID: {} in PENDING state", order.getId());
 
         try {
-            // Step 2: Validate and reserve inventory (Compensating transaction)
             validateAndReserveInventory(order);
             log.info("Inventory reserved successfully for order: {}", order.getId());
 
-            // Step 3: Process payment (Compensating transaction)
             processPayment(order);
             log.info("Payment processed successfully for order: {}", order.getId());
 
-            // Step 4: Confirm order
             confirmOrder(order);
             log.info("Order confirmed successfully: {}", order.getId());
 
-            // Step 5: Publish success event
             eventPublisher.publishOrderCreatedEvent(order);
 
         } catch (Exception e) {
             log.error("Saga failed for order: {}. Starting compensation...", order.getId(), e);
-
-            // COMPENSATING TRANSACTIONS (Rollback)
             compensateOrder(order, e.getMessage());
         }
 
@@ -75,23 +68,32 @@ public class OrderSagaOrchestrator {
         BigDecimal totalAmount = BigDecimal.ZERO;
 
         for (CreateOrderRequest.OrderItemRequest itemReq : request.getItems()) {
-            // Get product details from Product Service
-            ProductResponse product = productClient.getProductBySku(itemReq.getProductSku());
+            try {
+                ProductResponse product = productClient.getProductBySku(itemReq.getProductSku());
 
-            if (product.getPrice() == null || product.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
-                throw new RuntimeException("Invalid product price for SKU: " + itemReq.getProductSku());
+                if (product == null || product.getSku() == null) {
+                    throw new RuntimeException("Product not found for SKU: " + itemReq.getProductSku());
+                }
+
+                if (product.getPrice() == null || product.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+                    throw new RuntimeException("Invalid product price for SKU: " + itemReq.getProductSku());
+                }
+
+                OrderItem item = OrderItem.builder()
+                        .productSku(product.getSku())
+                        .productName(product.getName() != null ? product.getName() : product.getSku())
+                        .quantity(itemReq.getQuantity())
+                        .unitPrice(product.getPrice())
+                        .subtotal(product.getPrice().multiply(BigDecimal.valueOf(itemReq.getQuantity())))
+                        .build();
+
+                order.getItems().add(item);
+                totalAmount = totalAmount.add(item.getSubtotal());
+
+            } catch (Exception e) {
+                log.error("Error fetching product for SKU: {}", itemReq.getProductSku(), e);
+                throw new RuntimeException("Failed to fetch product: " + itemReq.getProductSku() + " - " + e.getMessage(), e);
             }
-
-            OrderItem item = OrderItem.builder()
-                    .productSku(product.getSku())
-                    .productName(product.getName())
-                    .quantity(itemReq.getQuantity())
-                    .unitPrice(product.getPrice())
-                    .subtotal(product.getPrice().multiply(BigDecimal.valueOf(itemReq.getQuantity())))
-                    .build();
-
-            order.getItems().add(item);
-            totalAmount = totalAmount.add(item.getSubtotal());
         }
 
         order.setTotalAmount(totalAmount);
@@ -102,44 +104,34 @@ public class OrderSagaOrchestrator {
         log.info("Validating inventory for order: {}", order.getId());
 
         for (OrderItem item : order.getItems()) {
-            // Check stock availability
             InventoryResponse inventory = inventoryClient.checkStock(item.getProductSku());
 
-            // FIXED: Use getAvailable() instead of getInStock()
-            if (inventory == null || !inventory.getAvailable() ||
-                    inventory.getAvailableQuantity() < item.getQuantity()) {
+            if (inventory == null || !Boolean.TRUE.equals(inventory.getAvailable()) ||
+                    inventory.getAvailableQuantity() == null || inventory.getAvailableQuantity() < item.getQuantity()) {
                 throw new InsufficientStockException(
                         String.format("Insufficient stock for SKU: %s. Available: %d, Requested: %d",
                                 item.getProductSku(),
-                                inventory != null ? inventory.getAvailableQuantity() : 0,
+                                inventory != null && inventory.getAvailableQuantity() != null ? inventory.getAvailableQuantity() : 0,
                                 item.getQuantity())
                 );
             }
 
-            // FIXED: Reserve stock and handle InventoryResponse
             InventoryResponse reserveResponse = inventoryClient.reserveStock(item.getProductSku(), item.getQuantity());
 
-            if (reserveResponse == null || !reserveResponse.getAvailable()) {
+            if (reserveResponse == null || !Boolean.TRUE.equals(reserveResponse.getAvailable())) {
                 throw new RuntimeException(
-                        String.format("Failed to reserve stock for SKU: %s. Response message: %s",
-                                item.getProductSku(),
-                                reserveResponse != null ? reserveResponse.getMessage() : "null response")
+                        String.format("Failed to reserve stock for SKU: %s",
+                                item.getProductSku())
                 );
             }
 
-            log.info("Reserved {} units for SKU: {}. Remaining quantity: {}",
-                    item.getQuantity(),
-                    item.getProductSku(),
-                    reserveResponse.getAvailableQuantity());
+            log.info("Reserved {} units for SKU: {}", item.getQuantity(), item.getProductSku());
         }
     }
 
     private void processPayment(Order order) {
         log.info("Processing payment for order: {}", order.getId());
-        // TODO: Call Payment Service via Feign (Day 5)
-        // For now, simulate successful payment
         order.setPaymentId("PAY-" + System.currentTimeMillis());
-        log.info("Payment processed with ID: {}", order.getPaymentId());
     }
 
     private void confirmOrder(Order order) {
@@ -148,31 +140,19 @@ public class OrderSagaOrchestrator {
     }
 
     private void compensateOrder(Order order, String reason) {
-        log.info("Starting compensation for order: {} due to: {}", order.getId(), reason);
+        log.info("Starting compensation for order: {}", order.getId());
 
-        // Compensating Step 1: Release reserved inventory
         try {
             for (OrderItem item : order.getItems()) {
-                //  WRONG - Passing negative quantity to reserveStock!
-                // InventoryResponse releaseResponse = inventoryClient.reserveStock(item.getProductSku(), -item.getQuantity());
-
-                //  CORRECT - Use releaseStock method for releasing!
                 InventoryResponse releaseResponse = inventoryClient.releaseStock(item.getProductSku(), item.getQuantity());
-                if (releaseResponse != null && releaseResponse.getAvailable()) {
-                    log.info("Released inventory for SKU: {}. Remaining quantity: {}",
-                            item.getProductSku(),
-                            releaseResponse.getAvailableQuantity());
-                } else {
-                    log.warn("Failed to release inventory for SKU: {}. Response: {}",
-                            item.getProductSku(),
-                            releaseResponse != null ? releaseResponse.getMessage() : "null");
+                if (releaseResponse != null && Boolean.TRUE.equals(releaseResponse.getAvailable())) {
+                    log.info("Released inventory for SKU: {}", item.getProductSku());
                 }
             }
         } catch (Exception e) {
-            log.error("Failed to release inventory during compensation for order: {}", order.getId(), e);
+            log.error("Failed to release inventory for order: {}", order.getId(), e);
         }
 
-        // Compensating Step 2: Mark order as FAILED
         order.setStatus(OrderStatus.FAILED);
         order.setFailureReason(reason);
         orderRepository.save(order);

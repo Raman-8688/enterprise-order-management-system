@@ -1,7 +1,7 @@
 package com.enterprise.oms.product.client.fallback;
 
 import com.enterprise.oms.product.client.InventoryClient;
-import com.enterprise.oms.product.dto.InventoryResponse;
+import com.enterprise.oms.product.dto.response.InventoryResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

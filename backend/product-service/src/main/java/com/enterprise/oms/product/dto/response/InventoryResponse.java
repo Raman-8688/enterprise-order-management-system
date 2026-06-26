@@ -1,4 +1,4 @@
-package com.enterprise.oms.product.dto;
+package com.enterprise.oms.product.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

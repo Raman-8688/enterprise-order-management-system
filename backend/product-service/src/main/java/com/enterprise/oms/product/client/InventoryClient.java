@@ -1,7 +1,7 @@
 package com.enterprise.oms.product.client;
 
 import com.enterprise.oms.product.client.fallback.InventoryClientFallback;
-import com.enterprise.oms.product.dto.InventoryResponse;
+import com.enterprise.oms.product.dto.response.InventoryResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,4 +25,8 @@ public interface InventoryClient {
             @RequestParam("sku") String sku,
             @RequestParam("quantity") Integer quantity
     );
+
+
+
+
 }

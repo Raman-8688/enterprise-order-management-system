@@ -26,6 +26,10 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
             "/api/auth/register",
             "/api/auth/login",
             "/api/auth/validate",
+            "/api/products",
+            "/api/products/",
+            "/api/inventory",
+            "/api/inventory/",
             "/actuator/health"
     );
 

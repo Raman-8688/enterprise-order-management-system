@@ -52,7 +52,7 @@ Responce:
 
 
 Intilize INventory:
-
+     
 Post: http://localhost:8080/api/inventory/initialize?sku=LAPTOP-002&quantity=50&location=WAREHOUSE_MAIN
 {
     "sku": "LAPTOP-002",

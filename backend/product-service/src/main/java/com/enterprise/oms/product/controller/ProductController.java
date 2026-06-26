@@ -30,28 +30,18 @@ public class ProductController {
     @PostMapping
     public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody CreateProductRequest request) {
         log.info("REST request to create product with SKU: {}", request.getSku());
-        try {
-            ProductResponse response = productService.createProduct(request);
-            return new ResponseEntity<>(response, HttpStatus.CREATED);
-        } catch (Exception e) {
-            log.error("Failed to create product: {}", e.getMessage(), e);
-            throw e;
-        }
+        ProductResponse response = productService.createProduct(request);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @GetMapping
     public ResponseEntity<List<ProductResponse>> getAllActiveProducts() {
         log.info("REST request to get all active products");
-        try {
-            List<ProductResponse> products = productService.getAllActiveProducts();
-            return ResponseEntity.ok(products);
-        } catch (Exception e) {
-            log.error("Failed to get products: {}", e.getMessage(), e);
-            return ResponseEntity.ok(List.of());
-        }
+        List<ProductResponse> products = productService.getAllActiveProducts();
+        return ResponseEntity.ok(products);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     public ResponseEntity<ProductResponse> getProductById(@PathVariable("id") String id) {
         log.info("REST request to get product by ID: {}", id);
         ProductResponse product = productService.getProductById(id);
@@ -61,13 +51,16 @@ public class ProductController {
     @GetMapping("/sku/{sku}")
     public ResponseEntity<ProductResponse> getProductBySku(@PathVariable("sku") String sku) {
         log.info("REST request to get product by SKU: {}", sku);
-        try {
-            ProductResponse product = productService.getProductBySku(sku);
-            return ResponseEntity.ok(product);
-        } catch (Exception e) {
-            log.error("Failed to get product by SKU: {}", sku, e);
-            throw e;
-        }
+        ProductResponse product = productService.getProductBySku(sku);
+        return ResponseEntity.ok(product);
+    }
+
+    // ADD THIS - For backward compatibility with direct {sku} path
+    @GetMapping("/{sku}")
+    public ResponseEntity<ProductResponse> getProductBySkuDirect(@PathVariable("sku") String sku) {
+        log.info("REST request to get product by SKU (direct): {}", sku);
+        ProductResponse product = productService.getProductBySku(sku);
+        return ResponseEntity.ok(product);
     }
 
     @PutMapping("/{id}")
@@ -94,7 +87,7 @@ public class ProductController {
     }
 
     @GetMapping("/category/{category}")
-    public ResponseEntity<List<ProductResponse>> getProductsByCategory(@PathVariable("category") String category) {  // ← FIXED
+    public ResponseEntity<List<ProductResponse>> getProductsByCategory(@PathVariable("category") String category) {
         log.info("REST request to get products by category: {}", category);
         List<ProductResponse> products = productService.getProductsByCategory(category);
         return ResponseEntity.ok(products);
@@ -110,21 +103,21 @@ public class ProductController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<ProductResponse>> searchProducts(@RequestParam("name") String name) {  // ← FIXED
+    public ResponseEntity<List<ProductResponse>> searchProducts(@RequestParam("name") String name) {
         log.info("REST request to search products by name: {}", name);
         List<ProductResponse> products = productService.searchProductsByName(name);
         return ResponseEntity.ok(products);
     }
 
     @GetMapping("/{sku}/stock-status")
-    public ResponseEntity<ProductStockStatusResponse> getProductStockStatus(@PathVariable("sku") String sku) {  // ← FIXED
+    public ResponseEntity<ProductStockStatusResponse> getProductStockStatus(@PathVariable("sku") String sku) {
         log.info("REST request to get stock status for SKU: {}", sku);
         ProductStockStatusResponse response = productService.getProductStockStatus(sku);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/exists/{sku}")
-    public ResponseEntity<Boolean> checkProductExists(@PathVariable("sku") String sku) {  // ← FIXED
+    public ResponseEntity<Boolean> checkProductExists(@PathVariable("sku") String sku) {
         log.info("REST request to check if product exists with SKU: {}", sku);
         boolean exists = productService.productExists(sku);
         return ResponseEntity.ok(exists);

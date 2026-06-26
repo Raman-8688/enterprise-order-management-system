@@ -29,12 +29,9 @@ public interface ProductRepository extends JpaRepository<Product, String> {
 
     List<Product> findByPriceBetween(BigDecimal minPrice, BigDecimal maxPrice);
 
+
     @Query("SELECT p FROM Product p WHERE p.name LIKE %:name% AND p.active = true")
     List<Product> searchByName(@Param("name") String name);
-
-    @Query("SELECT p FROM Product p WHERE p.category = :category AND p.price <= :maxPrice")
-    List<Product> findByCategoryAndMaxPrice(@Param("category") String category,
-                                            @Param("maxPrice") BigDecimal maxPrice);
 
     @Modifying
     @Transactional
