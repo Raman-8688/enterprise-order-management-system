@@ -17,6 +17,14 @@ public class KafkaConfig {
     }
 
     @Bean
+    public NewTopic paymentProcessedTopic() {
+        return TopicBuilder.name("payment-processed-events")
+                .partitions(3)
+                .replicas(1)
+                .build();
+    }
+
+    @Bean
     public NewTopic orderStatusChangedTopic() {
         return TopicBuilder.name("order-status-changed-events")
                 .partitions(3)

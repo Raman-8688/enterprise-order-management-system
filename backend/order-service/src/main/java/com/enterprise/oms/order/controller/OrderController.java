@@ -33,15 +33,25 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody CreateOrderRequest request) {
         log.info("REST request to create order for customer: {}", request.getCustomerEmail());
-        Order order = sagaOrchestrator.processOrder(request);
-        return new ResponseEntity<>(convertToResponse(order), HttpStatus.CREATED);
+        try {
+            Order order = sagaOrchestrator.processOrder(request);
+            return new ResponseEntity<>(convertToResponse(order), HttpStatus.CREATED);
+        } catch (Exception e) {
+            log.error("Failed to create order: {}", e.getMessage(), e);
+            throw e; // Let global exception handler handle it
+        }
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<OrderResponse> getOrder(@PathVariable String id) {
         log.info("REST request to get order: {}", id);
-        Order order = orderService.getOrderById(id);
-        return ResponseEntity.ok(convertToResponse(order));
+        try {
+            Order order = orderService.getOrderById(id);
+            return ResponseEntity.ok(convertToResponse(order));
+        } catch (Exception e) {
+            log.error("Failed to get order: {}", id, e);
+            throw e;
+        }
     }
 
     @GetMapping("/number/{orderNumber}")
@@ -64,9 +74,16 @@ public class OrderController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         log.info("REST request to get orders with status: {}", status);
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<Order> orders = orderService.getOrdersByStatus(status, pageable);
-        return ResponseEntity.ok(orders.map(this::convertToSummaryResponse));
+        try {
+            Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+            Page<Order> orders = orderService.getOrdersByStatus(status, pageable);
+            return ResponseEntity.ok(orders.map(this::convertToSummaryResponse));
+        } catch (Exception e) {
+            log.error("Failed to get orders by status: {}", status, e);
+            // Return empty page instead of throwing error
+            Pageable pageable = PageRequest.of(page, size);
+            return ResponseEntity.ok(Page.empty(pageable));
+        }
     }
 
     @PostMapping("/{id}/cancel")
@@ -83,6 +100,22 @@ public class OrderController {
         log.info("REST request to update order status: {} -> {}", id, request.getStatus());
         Order order = orderService.updateOrderStatus(id, request.getStatus(), request.getFailureReason());
         return ResponseEntity.ok(convertToResponse(order));
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<OrderSummaryResponse>> getAllOrders(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        log.info("REST request to get all orders");
+        try {
+            Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+            Page<Order> orders = orderService.getAllOrders(pageable);
+            return ResponseEntity.ok(orders.map(this::convertToSummaryResponse));
+        } catch (Exception e) {
+            log.error("Failed to get all orders", e);
+            Pageable pageable = PageRequest.of(page, size);
+            return ResponseEntity.ok(Page.empty(pageable));
+        }
     }
 
     private OrderResponse convertToResponse(Order order) {

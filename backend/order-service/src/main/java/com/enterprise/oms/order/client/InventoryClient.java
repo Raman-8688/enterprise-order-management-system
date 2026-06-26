@@ -9,9 +9,17 @@ import org.springframework.web.bind.annotation.*;
 public interface InventoryClient {
 
     @GetMapping("/api/inventory/{sku}")
-    InventoryResponse checkStock(@PathVariable("sku") String sku);
+    InventoryResponse checkStock(@PathVariable("sku") String sku);  // ← FIXED
 
-    @PostMapping("/api/inventory/{sku}/reserve")
-    Boolean reserveStock(@PathVariable("sku") String sku,
-                         @RequestParam Integer quantity);
+    @PostMapping("/api/inventory/reserve")
+    InventoryResponse reserveStock(
+            @RequestParam("sku") String sku,
+            @RequestParam("quantity") Integer quantity
+    );
+
+    @PostMapping("/api/inventory/release")
+    InventoryResponse releaseStock(
+            @RequestParam("sku") String sku,
+            @RequestParam("quantity") Integer quantity
+    );
 }

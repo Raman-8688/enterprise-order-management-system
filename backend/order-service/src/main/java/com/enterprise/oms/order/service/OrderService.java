@@ -14,4 +14,5 @@ public interface OrderService {
     Page<Order> getOrdersByStatus(OrderStatus status, Pageable pageable);
     Order cancelOrder(String id);
     Order updateOrderStatus(String id, OrderStatus status, String failureReason);
+    Page<Order> getAllOrders(Pageable pageable);
 }

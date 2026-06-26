@@ -71,4 +71,10 @@ public class OrderServiceImpl implements OrderService {
         log.info("Order status updated: {} -> {}", order.getOrderNumber(), status);
         return order;
     }
+
+
+    @Override
+    public Page<Order> getAllOrders(Pageable pageable) {
+        return orderRepository.findAll(pageable);
+    }
 }

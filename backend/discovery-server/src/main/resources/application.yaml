@@ -7,7 +7,7 @@ spring:
 
 eureka:
   instance:
-    hostname: localhost
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}
   client:
     register-with-eureka: false
     fetch-registry: false
@@ -16,13 +16,25 @@ eureka:
   server:
     enable-self-preservation: false
     eviction-interval-timer-in-ms: 30000
+    # For production, set to true
+    # enable-self-preservation: true
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
 
 logging:
   level:
     com.netflix.eureka: INFO
+    com.netflix.discovery: INFO
+
+info:
+  app:
+    name: ${spring.application.name}
+    version: 1.0.0
+    description: Eureka Service Discovery Server

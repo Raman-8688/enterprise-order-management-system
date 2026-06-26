@@ -10,10 +10,33 @@ spring:
         locator:
           enabled: true
           lower-case-service-id: true
+
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:4200"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - PATCH
+              - OPTIONS
+            allowedHeaders:
+              - "Authorization"
+              - "Content-Type"
+              - "X-Requested-With"
+              - "Accept"
+              - "Origin"
+            allowCredentials: true
+            maxAge: 3600
+
       default-filters:
         - name: AuthenticationFilter
+
       routes:
-        # Auth Service Routes
+        # ====== AUTH SERVICE ======
         - id: auth-service
           uri: lb://AUTH-SERVICE
           predicates:
@@ -21,37 +44,57 @@ spring:
           filters:
             - StripPrefix=0
 
-        # Product Service Routes
+        # ====== PRODUCT SERVICE ======
         - id: product-service
           uri: lb://PRODUCT-SERVICE
           predicates:
             - Path=/api/products/**
           filters:
             - StripPrefix=0
+            - name: Retry
+              args:
+                retries: 3
+                statuses: SERVICE_UNAVAILABLE
+                methods: GET,POST,PUT,DELETE
 
-        # Inventory Service Routes
+        # ====== INVENTORY SERVICE ======
         - id: inventory-service
           uri: lb://INVENTORY-SERVICE
           predicates:
             - Path=/api/inventory/**
           filters:
             - StripPrefix=0
+            - name: Retry
+              args:
+                retries: 3
+                statuses: SERVICE_UNAVAILABLE
+                methods: GET,POST,PUT,DELETE
 
-        # Order Service Routes (NO Circuit Breaker - Working!)
+        # ====== ORDER SERVICE ======
         - id: order-service
           uri: lb://ORDER-SERVICE
           predicates:
             - Path=/api/orders/**
           filters:
             - StripPrefix=0
+            - name: Retry
+              args:
+                retries: 3
+                statuses: SERVICE_UNAVAILABLE, BAD_GATEWAY
+                methods: GET,POST,PUT,DELETE
 
-        # Payment Service Routes (NO Circuit Breaker)
+        # ====== PAYMENT SERVICE ======
         - id: payment-service
           uri: lb://PAYMENT-SERVICE
           predicates:
             - Path=/api/payments/**
           filters:
             - StripPrefix=0
+            - name: Retry
+              args:
+                retries: 3
+                statuses: SERVICE_UNAVAILABLE
+                methods: GET,POST
 
 # JWT Configuration
 jwt:
@@ -61,20 +104,40 @@ jwt:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://discovery-server:8761/eureka/}
     register-with-eureka: true
     fetch-registry: true
   instance:
-    hostname: localhost
-    prefer-ip-address: true
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:api-gateway}
+    prefer-ip-address: ${EUREKA_INSTANCE_PREFER_IP_ADDRESS:false}
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
 
 logging:
   level:
     com.enterprise.oms.gateway: DEBUG
     org.springframework.cloud.gateway: DEBUG
+    org.springframework.cloud.gateway.route.RouteDefinitionRouteLocator: DEBUG
+    org.springframework.cloud.loadbalancer: DEBUG
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,gateway
+        include: health,info,gateway,metrics
+
+resilience4j:
+  retry:
+    instances:
+      orderService:
+        max-attempts: 3
+        wait-duration: 1s
+      productService:
+        max-attempts: 3
+        wait-duration: 1s
+      inventoryService:
+        max-attempts: 3
+        wait-duration: 1s
+      paymentService:
+        max-attempts: 3
+        wait-duration: 1s

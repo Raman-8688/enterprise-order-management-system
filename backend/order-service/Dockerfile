@@ -9,9 +9,9 @@ COPY target/*.jar app.jar
 RUN groupadd -r app && useradd -r -g app app
 USER app
 
-EXPOSE 8761
+EXPOSE 8084
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
-  CMD curl -f http://localhost:8761/actuator/health || exit 1
+  CMD curl -f http://localhost:8084/actuator/health || exit 1
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

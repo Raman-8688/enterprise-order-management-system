@@ -14,9 +14,15 @@ public interface InventoryClient {
     @GetMapping("/api/inventory/{sku}")
     InventoryResponse checkStock(@PathVariable("sku") String sku);
 
-    @PostMapping("/api/inventory/{sku}/reserve")
-    Boolean reserveStock(@PathVariable("sku") String sku, @RequestParam Integer quantity);
+    @PostMapping("/api/inventory/reserve")
+    Boolean reserveStock(
+            @RequestParam("sku") String sku,
+            @RequestParam("quantity") Integer quantity
+    );
 
-    @PostMapping("/api/inventory/{sku}/release")
-    Boolean releaseStock(@PathVariable("sku") String sku, @RequestParam Integer quantity);
+    @PostMapping("/api/inventory/release")
+    Boolean releaseStock(
+            @RequestParam("sku") String sku,
+            @RequestParam("quantity") Integer quantity
+    );
 }

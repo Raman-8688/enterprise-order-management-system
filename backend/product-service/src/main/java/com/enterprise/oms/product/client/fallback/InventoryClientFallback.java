@@ -11,25 +11,24 @@ public class InventoryClientFallback implements InventoryClient {
 
     @Override
     public InventoryResponse checkStock(String sku) {
-        log.warn("Circuit Breaker OPEN - Inventory service is DOWN for SKU: {}", sku);
-
+        log.warn("Inventory service fallback triggered for SKU: {}", sku);
         return InventoryResponse.builder()
                 .sku(sku)
                 .available(false)
-                .message("Inventory service is currently unavailable. Please try again later.")
                 .availableQuantity(0)
+                .message("Inventory service unavailable")
                 .build();
     }
 
     @Override
     public Boolean reserveStock(String sku, Integer quantity) {
-        log.warn("Circuit Breaker OPEN - Cannot reserve stock for SKU: {}", sku);
+        log.warn("Inventory reserve fallback triggered for SKU: {}", sku);
         return false;
     }
 
     @Override
     public Boolean releaseStock(String sku, Integer quantity) {
-        log.warn("Circuit Breaker OPEN - Cannot release stock for SKU: {}", sku);
+        log.warn("Inventory release fallback triggered for SKU: {}", sku);
         return false;
     }
 }

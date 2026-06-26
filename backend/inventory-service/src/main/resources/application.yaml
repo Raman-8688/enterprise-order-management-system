@@ -4,10 +4,11 @@ server:
 spring:
   application:
     name: inventory-service
+
   datasource:
-    url: jdbc:postgresql://localhost:5432/inventorydb
-    username: postgres
-    password: postgres
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5435/inventorydb}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
     hikari:
       connection-timeout: 30000
@@ -15,6 +16,7 @@ spring:
       minimum-idle: 5
       idle-timeout: 600000
       pool-name: InventoryServiceHikariPool
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -25,17 +27,18 @@ spring:
     show-sql: false
     open-in-view: false
 
+# FIXED: Eureka Configuration for Docker
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://discovery-server:8761/eureka/}
     register-with-eureka: true
     fetch-registry: true
     healthcheck:
       enabled: true
   instance:
-    hostname: localhost
-    prefer-ip-address: true
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}
+    prefer-ip-address: ${EUREKA_INSTANCE_PREFER_IP_ADDRESS:false}
     lease-renewal-interval-in-seconds: 10
     lease-expiration-duration-in-seconds: 30
     instance-id: ${spring.application.name}:${random.value}
@@ -43,6 +46,7 @@ eureka:
 logging:
   level:
     com.enterprise.oms.inventory: DEBUG
+    org.springframework.web: INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
   file:
@@ -59,6 +63,10 @@ management:
   endpoint:
     health:
       show-details: always
+  metrics:
+    export:
+      simple:
+        enabled: true
 
 info:
   app:

@@ -196,13 +196,22 @@ public class ProductServiceImpl implements ProductService {
             // Call Inventory Service via Feign Client
             InventoryResponse inventoryResponse = inventoryClient.checkStock(sku);
 
-            responseBuilder.inventoryAvailable(inventoryResponse.getAvailable())
-                    .availableQuantity(inventoryResponse.getAvailableQuantity())
-                    .message(inventoryResponse.getMessage())
-                    .circuitBreakerOpen(false);
+            if (inventoryResponse != null) {
+                responseBuilder.inventoryAvailable(inventoryResponse.getAvailable() != null && inventoryResponse.getAvailable())
+                        .availableQuantity(inventoryResponse.getAvailableQuantity() != null ? inventoryResponse.getAvailableQuantity() : 0)
+                        .message(inventoryResponse.getMessage() != null ? inventoryResponse.getMessage() : "Stock available")
+                        .circuitBreakerOpen(false);
+            } else {
+                responseBuilder.inventoryAvailable(false)
+                        .availableQuantity(0)
+                        .message("Inventory service returned null response")
+                        .circuitBreakerOpen(true);
+            }
 
             log.info("Inventory status for SKU {}: available={}, quantity={}",
-                    sku, inventoryResponse.getAvailable(), inventoryResponse.getAvailableQuantity());
+                    sku,
+                    inventoryResponse != null ? inventoryResponse.getAvailable() : null,
+                    inventoryResponse != null ? inventoryResponse.getAvailableQuantity() : 0);
 
         } catch (Exception e) {
             log.error("Failed to fetch inventory status for SKU: {}", sku, e);

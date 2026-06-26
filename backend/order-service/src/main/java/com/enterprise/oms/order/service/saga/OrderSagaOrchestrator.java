@@ -116,13 +116,21 @@ public class OrderSagaOrchestrator {
                 );
             }
 
-            // Reserve stock
-            Boolean reserved = inventoryClient.reserveStock(item.getProductSku(), item.getQuantity());
-            if (!Boolean.TRUE.equals(reserved)) {
-                throw new RuntimeException("Failed to reserve stock for SKU: " + item.getProductSku());
+            // FIXED: Reserve stock and handle InventoryResponse
+            InventoryResponse reserveResponse = inventoryClient.reserveStock(item.getProductSku(), item.getQuantity());
+
+            if (reserveResponse == null || !reserveResponse.getAvailable()) {
+                throw new RuntimeException(
+                        String.format("Failed to reserve stock for SKU: %s. Response message: %s",
+                                item.getProductSku(),
+                                reserveResponse != null ? reserveResponse.getMessage() : "null response")
+                );
             }
 
-            log.info("Reserved {} units for SKU: {}", item.getQuantity(), item.getProductSku());
+            log.info("Reserved {} units for SKU: {}. Remaining quantity: {}",
+                    item.getQuantity(),
+                    item.getProductSku(),
+                    reserveResponse.getAvailableQuantity());
         }
     }
 
@@ -145,9 +153,20 @@ public class OrderSagaOrchestrator {
         // Compensating Step 1: Release reserved inventory
         try {
             for (OrderItem item : order.getItems()) {
-                // Release stock (negative reserve means release)
-                inventoryClient.reserveStock(item.getProductSku(), -item.getQuantity());
-                log.info("Released inventory for SKU: {}", item.getProductSku());
+                //  WRONG - Passing negative quantity to reserveStock!
+                // InventoryResponse releaseResponse = inventoryClient.reserveStock(item.getProductSku(), -item.getQuantity());
+
+                //  CORRECT - Use releaseStock method for releasing!
+                InventoryResponse releaseResponse = inventoryClient.releaseStock(item.getProductSku(), item.getQuantity());
+                if (releaseResponse != null && releaseResponse.getAvailable()) {
+                    log.info("Released inventory for SKU: {}. Remaining quantity: {}",
+                            item.getProductSku(),
+                            releaseResponse.getAvailableQuantity());
+                } else {
+                    log.warn("Failed to release inventory for SKU: {}. Response: {}",
+                            item.getProductSku(),
+                            releaseResponse != null ? releaseResponse.getMessage() : "null");
+                }
             }
         } catch (Exception e) {
             log.error("Failed to release inventory during compensation for order: {}", order.getId(), e);

@@ -1,70 +1,402 @@
-services:
-  # Discovery Server (Eureka)
-  discovery-server:
-    build: ../backend/discovery-server
-    container_name: discovery-server
-    ports:
-      - "8761:8761"
-    environment:
-      EUREKA_SERVER_ENABLE_SELF_PRESERVATION: "false"
-    restart: unless-stopped
-    networks:
-      - microservices-network
+# docker/docker-compose.yml
+version: "3.8"
 
-  # PostgreSQL for Auth Service
+networks:
+  oms-network:
+    driver: bridge
+    name: oms-network
+
+volumes:
+  postgres-auth-data:
+  postgres-order-data:
+  postgres-payment-data:
+  postgres-product-data:
+  postgres-inventory-data:
+  kafka-data:
+  zookeeper-data:
+
+services:
+  # ==================== INFRASTRUCTURE ====================
+
+  # ---------- POSTGRES DATABASES ----------
   postgres-auth:
     image: postgres:15-alpine
     container_name: postgres-auth
+    restart: unless-stopped
     environment:
       POSTGRES_DB: authdb
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
-    restart: unless-stopped
+      - postgres-auth-data:/var/lib/postgresql/data
     networks:
-      - microservices-network
+      - oms-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # Auth Service
-  auth-service:
-    build: ../backend/auth-service
-    container_name: auth-service
-    ports:
-      - "8081:8081"
+  postgres-order:
+    image: postgres:15-alpine
+    container_name: postgres-order
+    restart: unless-stopped
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      POSTGRES_DB: orderdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5436:5432"
+    volumes:
+      - postgres-order-data:/var/lib/postgresql/data
+    networks:
+      - oms-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-payment:
+    image: postgres:15-alpine
+    container_name: postgres-payment
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: paymentdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5437:5432"
+    volumes:
+      - postgres-payment-data:/var/lib/postgresql/data
+    networks:
+      - oms-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-product:
+    image: postgres:15-alpine
+    container_name: postgres-product
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: productdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-product-data:/var/lib/postgresql/data
+    networks:
+      - oms-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-inventory:
+    image: postgres:15-alpine
+    container_name: postgres-inventory
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: inventorydb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres-inventory-data:/var/lib/postgresql/data
+    networks:
+      - oms-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------- KAFKA ----------
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    restart: unless-stopped
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_SYNC_LIMIT: 2
+    ports:
+      - "2181:2181"
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+    networks:
+      - oms-network
+    healthcheck:
+      test: ["CMD", "echo", "ruok", "|", "nc", "localhost", "2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    restart: unless-stopped
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      # FIXED: Use kafka:9093 for internal, localhost:9092 for external
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9093,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_LOG_RETENTION_BYTES: 1073741824
+      KAFKA_COMPRESSION_TYPE: snappy
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    networks:
+      - oms-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "kafka-topics",
+          "--bootstrap-server",
+          "localhost:9092",
+          "--list",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ---------- KAFKA UI ----------
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    restart: unless-stopped
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9093
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    ports:
+      - "8086:8080"
+    networks:
+      - oms-network
+
+  # ==================== MICROSERVICES ====================
+
+  # ---------- DISCOVERY SERVER ----------
+  discovery-server:
+    build:
+      context: ../backend/discovery-server
+      dockerfile: Dockerfile
+    container_name: discovery-server
+    restart: unless-stopped
+    ports:
+      - "8761:8761"
+    networks:
+      - oms-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  # ---------- API GATEWAY ----------
+  api-gateway:
+    build:
+      context: ../backend/api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    restart: unless-stopped
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: api-gateway
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "false"
+      JWT_SECRET: ${JWT_SECRET:-404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+      LOGGING_LEVEL_COM_ENTERPRISE_OMS_GATEWAY: DEBUG
+    ports:
+      - "8080:8080"
+    networks:
+      - oms-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  # ---------- AUTH SERVICE ----------
+  auth-service:
+    build:
+      context: ../backend/auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    restart: unless-stopped
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-auth:5432/authdb
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
-    depends_on:
-      - postgres-auth
-      - discovery-server
-    restart: unless-stopped
-    networks:
-      - microservices-network
-
-  # API Gateway
-  api-gateway:
-    build: ../backend/api-gateway
-    container_name: api-gateway
+      EUREKA_INSTANCE_HOSTNAME: auth-service
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "false"
+      JWT_SECRET: ${JWT_SECRET:-404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
     ports:
-      - "8080:8080"
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
-    depends_on:
-      - auth-service
-      - discovery-server
-    restart: unless-stopped
+      - "8081:8081"
     networks:
-      - microservices-network
+      - oms-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
 
-networks:
-  microservices-network:
-    driver: bridge
+  # ---------- PRODUCT SERVICE ----------
+  product-service:
+    build:
+      context: ../backend/product-service
+      dockerfile: Dockerfile
+    container_name: product-service
+    restart: unless-stopped
+    depends_on:
+      postgres-product:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-product:5432/productdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: product-service
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "false"
+    ports:
+      - "8082:8082"
+    networks:
+      - oms-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
 
-volumes:
-  postgres-data:
+  # ---------- INVENTORY SERVICE ----------
+  inventory-service:
+    build:
+      context: ../backend/inventory-service
+      dockerfile: Dockerfile
+    container_name: inventory-service
+    restart: unless-stopped
+    depends_on:
+      postgres-inventory:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-inventory:5432/inventorydb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: inventory-service
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "false"
+    ports:
+      - "8083:8083"
+    networks:
+      - oms-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  # ---------- ORDER SERVICE ----------
+  order-service:
+    build:
+      context: ../backend/order-service
+      dockerfile: Dockerfile
+    container_name: order-service
+    restart: unless-stopped
+    depends_on:
+      postgres-order:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-order:5432/orderdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9093
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: order-service
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "false"
+    ports:
+      - "8084:8084"
+    networks:
+      - oms-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  # ---------- PAYMENT SERVICE ----------
+  payment-service:
+    build:
+      context: ../backend/payment-service
+      dockerfile: Dockerfile
+    container_name: payment-service
+    restart: unless-stopped
+    depends_on:
+      postgres-payment:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-payment:5432/paymentdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9093
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: payment-service
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "false"
+    ports:
+      - "8085:8085"
+    networks:
+      - oms-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
