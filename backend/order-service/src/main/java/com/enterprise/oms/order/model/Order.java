@@ -49,6 +49,7 @@ public class Order {
 
     private String paymentId;
 
+    @Column(columnDefinition = "TEXT")
     private String failureReason;
 
     @CreationTimestamp

@@ -100,6 +100,7 @@ public class OrderSagaOrchestrator {
         return order;
     }
 
+    // In the validateAndReserveInventory method
     private void validateAndReserveInventory(Order order) {
         log.info("Validating inventory for order: {}", order.getId());
 
@@ -116,12 +117,17 @@ public class OrderSagaOrchestrator {
                 );
             }
 
-            InventoryResponse reserveResponse = inventoryClient.reserveStock(item.getProductSku(), item.getQuantity());
+            // Now this will work correctly with the updated path
+            InventoryResponse reserveResponse = inventoryClient.reserveStock(
+                    item.getProductSku(),
+                    item.getQuantity()
+            );
 
             if (reserveResponse == null || !Boolean.TRUE.equals(reserveResponse.getAvailable())) {
                 throw new RuntimeException(
-                        String.format("Failed to reserve stock for SKU: %s",
-                                item.getProductSku())
+                        String.format("Failed to reserve stock for SKU: %s - %s",
+                                item.getProductSku(),
+                                reserveResponse != null ? reserveResponse.getMessage() : "Unknown error")
                 );
             }
 

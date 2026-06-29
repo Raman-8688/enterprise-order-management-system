@@ -4,13 +4,8 @@ import com.enterprise.oms.product.model.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,21 +18,9 @@ public interface ProductRepository extends JpaRepository<Product, String> {
 
     List<Product> findByActiveTrue();
 
-    Page<Product> findByActiveTrue(Pageable pageable);
+    // For pagination with search
+    Page<Product> findByNameContainingIgnoreCaseOrSkuContainingIgnoreCase(String name, String sku, Pageable pageable);
 
-    List<Product> findByCategory(String category);
-
-    List<Product> findByPriceBetween(BigDecimal minPrice, BigDecimal maxPrice);
-
-
-    @Query("SELECT p FROM Product p WHERE p.name LIKE %:name% AND p.active = true")
-    List<Product> searchByName(@Param("name") String name);
-
-    @Modifying
-    @Transactional
-    @Query("UPDATE Product p SET p.active = false WHERE p.sku = :sku")
-    void deactivateBySku(@Param("sku") String sku);
-
-    @Query("SELECT COUNT(p) FROM Product p WHERE p.active = true")
-    long countActiveProducts();
+    // For search without pagination
+    List<Product> findByNameContainingIgnoreCaseOrSkuContainingIgnoreCase(String name, String sku);
 }

@@ -12,7 +12,6 @@ public class InventoryClientFallback implements InventoryClient {
     @Override
     public InventoryResponse checkStock(String sku) {
         log.warn("Inventory service is unavailable! Using fallback for SKU: {}", sku);
-
         return InventoryResponse.builder()
                 .sku(sku)
                 .available(false)
@@ -22,9 +21,8 @@ public class InventoryClientFallback implements InventoryClient {
     }
 
     @Override
-    public InventoryResponse reserveStock(String sku, Integer quantity) {  // ← Changed from Boolean to InventoryResponse
+    public InventoryResponse reserveStock(String sku, Integer quantity) {
         log.warn("Inventory service is unavailable! Cannot reserve stock for SKU: {}, quantity: {}", sku, quantity);
-
         return InventoryResponse.builder()
                 .sku(sku)
                 .available(false)
@@ -36,7 +34,6 @@ public class InventoryClientFallback implements InventoryClient {
     @Override
     public InventoryResponse releaseStock(String sku, Integer quantity) {
         log.warn("Inventory service is unavailable! Cannot release stock for SKU: {}, quantity: {}", sku, quantity);
-
         return InventoryResponse.builder()
                 .sku(sku)
                 .available(false)
@@ -44,5 +41,4 @@ public class InventoryClientFallback implements InventoryClient {
                 .message("RELEASE_FAILED_SERVICE_UNAVAILABLE")
                 .build();
     }
-
 }

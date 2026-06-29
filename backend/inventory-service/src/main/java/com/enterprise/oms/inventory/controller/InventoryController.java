@@ -3,14 +3,12 @@ package com.enterprise.oms.inventory.controller;
 import com.enterprise.oms.inventory.dto.request.UpdateStockRequest;
 import com.enterprise.oms.inventory.dto.response.InventoryResponse;
 import com.enterprise.oms.inventory.dto.response.StockLevelResponse;
+import com.enterprise.oms.inventory.exception.InsufficientStockException;
+import com.enterprise.oms.inventory.exception.InventoryNotFoundException;
 import com.enterprise.oms.inventory.service.InventoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -51,22 +49,63 @@ public class InventoryController {
         return ResponseEntity.ok(response);
     }
 
+    // FIXED: Return InventoryResponse instead of Boolean
     @PostMapping("/{sku}/reserve")
-    public ResponseEntity<Boolean> reserveStock(
+    public ResponseEntity<InventoryResponse> reserveStock(
             @PathVariable("sku") String sku,
             @RequestParam("quantity") Integer quantity) {
         log.info("REST request to reserve stock for SKU: {} quantity: {}", sku, quantity);
-        Boolean result = inventoryService.reserveStock(sku, quantity);
-        return ResponseEntity.ok(result);
+        try {
+            Boolean result = inventoryService.reserveStock(sku, quantity);
+
+            // Get updated inventory to return full response
+            InventoryResponse response = inventoryService.checkStock(sku);
+            response.setMessage(result ? "Stock reserved successfully" : "Failed to reserve stock");
+
+            return ResponseEntity.ok(response);
+
+        } catch (InsufficientStockException e) {
+            // Return a response with the error message
+            InventoryResponse response = InventoryResponse.builder()
+                    .sku(sku)
+                    .available(false)
+                    .message(e.getMessage())
+                    .build();
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+
+        } catch (InventoryNotFoundException e) {
+            InventoryResponse response = InventoryResponse.builder()
+                    .sku(sku)
+                    .available(false)
+                    .message(e.getMessage())
+                    .build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
     }
 
+    // FIXED: Return InventoryResponse instead of Boolean
     @PostMapping("/{sku}/release")
-    public ResponseEntity<Boolean> releaseStock(
+    public ResponseEntity<InventoryResponse> releaseStock(
             @PathVariable("sku") String sku,
             @RequestParam("quantity") Integer quantity) {
         log.info("REST request to release stock for SKU: {} quantity: {}", sku, quantity);
-        Boolean result = inventoryService.releaseStock(sku, quantity);
-        return ResponseEntity.ok(result);
+        try {
+            Boolean result = inventoryService.releaseStock(sku, quantity);
+
+            // Get updated inventory to return full response
+            InventoryResponse response = inventoryService.checkStock(sku);
+            response.setMessage(result ? "Stock released successfully" : "Failed to release stock");
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            InventoryResponse response = InventoryResponse.builder()
+                    .sku(sku)
+                    .available(false)
+                    .message(e.getMessage())
+                    .build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
     @PostMapping("/{sku}/deduct")
