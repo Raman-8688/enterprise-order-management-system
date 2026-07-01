@@ -92,10 +92,22 @@
             <div class="oms-card-body">
               @for (item of items; let i = $index; track i) {
                 <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:8px">
-                  <mat-form-field appearance="outline" style="flex:1">
+                  <!-- <mat-form-field appearance="outline" style="flex:1">
                     <mat-label>Product SKU</mat-label>
                     <input matInput [(ngModel)]="item.productSku" [name]="'sku-'+i" placeholder="e.g. LAPTOP-002" required />
                     <mat-icon matSuffix>qr_code</mat-icon>
+                  </mat-form-field> -->
+                  <!-- Replace the text input with a select -->
+                  <mat-form-field appearance="outline" style="flex:1">
+                    <mat-label>Product</mat-label>
+                    <mat-select [(ngModel)]="item.productSku" [name]="'sku-'+i" required>
+                      @for (product of availableProducts; track product.sku) {
+                        <mat-option [value]="product.sku">
+                          {{ product.name }} ({{ product.sku }})
+                        </mat-option>
+                      }
+                    </mat-select>
+                    <mat-icon matSuffix>search</mat-icon>
                   </mat-form-field>
                   <mat-form-field appearance="outline" style="width:100px">
                     <mat-label>Qty</mat-label>
