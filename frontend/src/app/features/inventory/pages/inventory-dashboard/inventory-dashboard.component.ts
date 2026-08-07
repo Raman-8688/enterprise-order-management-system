@@ -10,6 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatSelectModule } from '@angular/material/select';
 import { TopbarComponent } from '../../../../shared/components/topbar/topbar.component';
 import { BadgeComponent } from '../../../../shared/components/badge/badge.component';
 import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
@@ -18,13 +19,15 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
 import { InventoryService } from '../../services/inventory.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { InventoryItem, getStockStatus } from '../../models/inventory.model';
+import { ProductService } from 'src/app/features/products/services/product.service';
+import { Product } from 'src/app/features/products/models/product.model';
 
 @Component({
   selector: 'app-inventory-dashboard',
   standalone: true,
   imports: [
     CommonModule, FormsModule,
-    MatIconModule, MatButtonModule, MatFormFieldModule, MatInputModule,
+    MatIconModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule,
     MatProgressBarModule, MatProgressSpinnerModule, MatTooltipModule, MatDividerModule, MatChipsModule,
     TopbarComponent, BadgeComponent, LoadingSpinnerComponent, PageHeaderComponent, EmptyStateComponent
   ],
@@ -41,9 +44,41 @@ export class InventoryDashboardComponent implements OnInit {
   showRestock = false;
   restockLoading = false;
   stats = { inStock: 0, lowStock: 0, outOfStock: 0, total: 0 };
+  availableProducts: Product[] = [];
+  skuSearchTerm = '';
 
-  constructor(private inventoryService: InventoryService, private notif: NotificationService) {}
-  ngOnInit() { this.load(); }
+  constructor(
+    private inventoryService: InventoryService,
+    private productService: ProductService,
+    private notif: NotificationService
+  ) {}
+
+  ngOnInit() {
+    this.load();
+    this.loadProducts();
+  }
+
+  loadProducts() {
+    this.productService.getAll(0, 100).subscribe({
+      next: (page) => {
+        this.availableProducts = page?.content || [];
+      },
+      error: (err) => {
+        console.error('Failed to load products:', err);
+      }
+    });
+  }
+
+  get filteredProducts(): Product[] {
+    if (!this.skuSearchTerm) {
+      return this.availableProducts;
+    }
+    const term = this.skuSearchTerm.toLowerCase().trim();
+    return this.availableProducts.filter(p =>
+      (p.sku && p.sku.toLowerCase().includes(term)) ||
+      (p.name && p.name.toLowerCase().includes(term))
+    );
+  }
 
   load() {
     this.loading = true;

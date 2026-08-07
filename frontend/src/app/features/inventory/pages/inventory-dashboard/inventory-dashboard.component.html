@@ -21,9 +21,46 @@
         <div class="row g-3 align-items-end">
           <div class="col-md-4">
             <mat-form-field appearance="outline" class="w-100">
-              <mat-label>SKU *</mat-label>
-              <input matInput [(ngModel)]="initForm.sku" placeholder="e.g. LAPTOP-002" />
-              <mat-icon matSuffix>tag</mat-icon>
+              <mat-label>Select SKU / Product *</mat-label>
+              <mat-select [(ngModel)]="initForm.sku" name="initSku" required placeholder="Choose SKU">
+                <!-- Search Input Field inside Mat-Select -->
+                <div style="padding: 8px 12px; position: sticky; top: 0; background: #ffffff; z-index: 100; border-bottom: 1px solid #e2e8f0;">
+                  <div style="display: flex; align-items: center; gap: 8px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 10px;">
+                    <mat-icon style="font-size: 16px; width: 16px; height: 16px; color: #64748b;">search</mat-icon>
+                    <input
+                      matInput
+                      type="text"
+                      style="border: none; outline: none; background: transparent; width: 100%; font-size: 13px;"
+                      placeholder="Search SKU or Product Name..."
+                      [(ngModel)]="skuSearchTerm"
+                      [ngModelOptions]="{standalone: true}"
+                      (keydown)="$event.stopPropagation()"
+                      (click)="$event.stopPropagation()"
+                    />
+                    @if (skuSearchTerm) {
+                      <button mat-icon-button type="button" style="width:20px;height:20px;line-height:20px" (click)="skuSearchTerm=''; $event.stopPropagation()">
+                        <mat-icon style="font-size:14px;width:14px;height:14px">close</mat-icon>
+                      </button>
+                    }
+                  </div>
+                </div>
+                @for (product of filteredProducts; track product.sku) {
+                  <mat-option [value]="product.sku">
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                      <span><strong>{{ product.sku }}</strong> — {{ product.name }}</span>
+                      @if (product.category) {
+                        <span style="font-size: 11px; color: #64748b; margin-left: 8px;">{{ product.category }}</span>
+                      }
+                    </div>
+                  </mat-option>
+                }
+                @if (filteredProducts.length === 0) {
+                  <mat-option disabled>
+                    <em>No matching products found</em>
+                  </mat-option>
+                }
+              </mat-select>
+              <mat-icon matSuffix>search</mat-icon>
             </mat-form-field>
           </div>
           <div class="col-md-3">
