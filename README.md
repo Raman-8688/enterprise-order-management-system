@@ -69,6 +69,9 @@ graph TD
 
 ## 🚀 How to Run the Project Simply Using Docker
 
+> [!TIP]
+> 📖 **Official Docker & Low-Storage Running Guide**: For day-to-day running, avoiding C: drive disk bloat, and automated Kafka event streaming details, see [`docker-running-guide.md`](file:///d:/enterprise-order-management-system/docker-running-guide.md).
+
 All infrastructure (databases, Kafka, Eureka) and microservices are containerized. Follow these instructions to launch the entire stack:
 
 ### Prerequisites
