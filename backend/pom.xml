@@ -31,6 +31,8 @@
         <postgresql.version>42.7.1</postgresql.version>
         <kafka.version>3.6.0</kafka.version>
         <resilience4j.version>2.2.0</resilience4j.version>
+        <micrometer-tracing.version>1.2.0</micrometer-tracing.version>
+        <zipkin-reporter.version>2.16.3</zipkin-reporter.version>
         <testcontainers.version>1.19.3</testcontainers.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
     </properties>
@@ -110,6 +112,18 @@
                 <artifactId>mapstruct-processor</artifactId>
                 <version>${mapstruct.version}</version>
                 <scope>provided</scope>
+            </dependency>
+
+            <!-- Micrometer Tracing & Zipkin -->
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-tracing-bridge-brave</artifactId>
+                <version>${micrometer-tracing.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.zipkin.reporter2</groupId>
+                <artifactId>zipkin-reporter-brave</artifactId>
+                <version>${zipkin-reporter.version}</version>
             </dependency>
 
             <!-- Testcontainers -->

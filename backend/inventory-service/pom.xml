@@ -51,6 +51,12 @@
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 
+		<!-- Tracing -->
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-tracing-bridge-brave</artifactId>
+		</dependency>
+
 		<!-- Cloud Dependencies -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>

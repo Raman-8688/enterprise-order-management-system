@@ -1,0 +1,5 @@
+﻿# Inventory Service Central Configuration
+app:
+  inventory:
+    low-stock-threshold: 5
+    allow-backorder: false

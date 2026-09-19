@@ -55,8 +55,10 @@ eureka:
     instance-id: ${spring.application.name}:${random.value}
 
 logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
   level:
-    com.enterprise.oms.auth: DEBUG
+    com.enterprise.oms.auth: INFO
     com.netflix.discovery: INFO
     org.springframework.security: INFO
     org.springframework.web: INFO

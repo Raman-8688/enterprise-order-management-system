@@ -6,7 +6,7 @@ spring:
     name: order-service
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5436/orderdb}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/orderdb}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
     password: ${SPRING_DATASOURCE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
@@ -31,9 +31,8 @@ spring:
     show-sql: false
     open-in-view: false
 
-  # FIXED: Kafka Configuration for Docker
   kafka:
-    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9093}
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
 
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -65,18 +64,17 @@ spring:
       concurrency: 3
       missing-topics-fatal: false
 
-# FIXED: Eureka Configuration for Docker
 eureka:
   client:
     service-url:
-      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://discovery-server:8761/eureka/}
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
     register-with-eureka: true
     fetch-registry: true
     healthcheck:
       enabled: true
   instance:
     hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}
-    prefer-ip-address: ${EUREKA_INSTANCE_PREFER_IP_ADDRESS:false}
+    prefer-ip-address: ${EUREKA_INSTANCE_PREFER_IP_ADDRESS:true}
     lease-renewal-interval-in-seconds: 10
     lease-expiration-duration-in-seconds: 30
     instance-id: ${spring.application.name}:${random.value}
@@ -146,14 +144,12 @@ feign:
     enabled: true
 
 logging:
-  level:
-    com.enterprise.oms.order: DEBUG
-    com.enterprise.oms.order.client: DEBUG
-    org.springframework.cloud.openfeign: DEBUG
-    org.springframework.kafka: INFO
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+  level:
+    com.enterprise.oms.order: INFO
+    org.springframework.cloud.openfeign: INFO
+    org.springframework.kafka: INFO
   file:
     name: logs/order-service.log
     max-size: 10MB

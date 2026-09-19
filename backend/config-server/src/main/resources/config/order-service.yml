@@ -1,0 +1,7 @@
+﻿# Order Service Central Configuration
+app:
+  order:
+    default-currency: USD
+    max-items-per-order: 50
+    enable-auto-cancellation: true
+    discount-percentage: 10
