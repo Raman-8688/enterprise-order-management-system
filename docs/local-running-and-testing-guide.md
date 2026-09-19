@@ -197,3 +197,31 @@ INFO [inventory-service,5a8f4c2e1b,9e2f4a1c8b] : Stock verified for SKU: IPHONE_
 1. Stop the **`inventory-service`** terminal (`Ctrl + C`).
 2. Place another order via `POST http://localhost:8080/api/orders`.
 3. Notice that `order-service` does NOT crash or hang indefinitely; it executes `InventoryClientFallback` gracefully and returns an informative fallback response!
+### 6. Dynamic Config Refresh Test (@RefreshScope)
+
+1. Start `config-server` on port `8888` and `order-service` on port `8084`.
+2. Fetch the live configuration via `order-service`:
+   ```bash
+   curl -X GET http://localhost:8084/api/orders/config
+   ```
+   **Output:**
+   ```json
+   {
+     "status": "SUCCESS",
+     "message": "Live configuration fetched via Spring Cloud Config & @RefreshScope",
+     "discountPercentage": 10,
+     "defaultCurrency": "USD",
+     "maxItemsPerOrder": 50,
+     "enableAutoCancellation": true
+   }
+   ```
+3. Modify `discount-percentage: 25` in `config-server/src/main/resources/config/order-service.yml`.
+4. Trigger dynamic reload without restarting `order-service`:
+   ```bash
+   curl -X POST http://localhost:8084/actuator/refresh
+   ```
+5. Call `GET http://localhost:8084/api/orders/config` again:
+   * Notice `discountPercentage` is immediately updated to **`25`** with zero downtime!
+
+### 7. Spring Boot DevTools (Hot Restart)
+Every microservice now includes `spring-boot-devtools`. Whenever you edit Java code or YAML files in your IDE and recompile/save, Spring Boot automatically restarts the application context in ~1 second without needing to restart the process!

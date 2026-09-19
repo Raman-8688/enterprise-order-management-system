@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: order-service
+  config:
+    import: "optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888/}"
 
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/orderdb}
@@ -159,7 +161,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,circuitbreakers
+        include: health,info,metrics,circuitbreakers,refresh
       base-path: /actuator
   endpoint:
     health:
